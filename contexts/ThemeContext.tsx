@@ -12,17 +12,22 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  // Inicializar con el tema actual del DOM (ya establecido por el script)
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+    return 'light';
+  });
 
   useEffect(() => {
-    // Verificar si hay un tema guardado en localStorage
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    // Si no hay tema guardado, verificar la preferencia del sistema
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const initialTheme = savedTheme || systemTheme;
-
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle('dark', initialTheme === 'dark');
+    // Solo sincronizar el estado con el DOM
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark && theme !== 'dark') {
+      setTheme('dark');
+    } else if (!isDark && theme !== 'light') {
+      setTheme('light');
+    }
   }, []);
 
   const toggleTheme = () => {
