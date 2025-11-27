@@ -1,4 +1,4 @@
-import VideoPlayer from '@/components/dashboard/VideoPlayer';
+import DemoVideoPlayerWrapper from './DemoVideoPlayerWrapper';
 import Link from 'next/link';
 
 export const metadata = {
@@ -70,7 +70,7 @@ export default function DemoVideoPage() {
           <div className="lg:col-span-2">
             {/* Video Player */}
             <div className="bg-black rounded-lg overflow-hidden shadow-xl mb-6">
-              <VideoPlayer
+              <DemoVideoPlayerWrapper
                 videoUrl={currentVideo.videoUrl}
                 title={currentVideo.title}
               />

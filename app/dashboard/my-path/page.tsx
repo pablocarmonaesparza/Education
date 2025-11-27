@@ -1,231 +1,350 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+'use client';
 
-export default async function LearningPathPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
 
-  if (!user) {
-    redirect('/auth/login');
+interface Video {
+  order: number;
+  section: string;
+  subsection?: string;
+  description: string;
+  duration: string;
+  why_relevant?: string;
+  video_url?: string;
+}
+
+interface Phase {
+  phase_number: number;
+  phase_name: string;
+  description?: string;
+  phase_duration?: string;
+  videos: Video[];
+}
+
+interface GeneratedPath {
+  user_project?: string;
+  total_videos?: number;
+  estimated_hours?: string;
+  learning_path_summary?: string[];
+  phases: Phase[];
+  recommendations?: string[];
+}
+
+export default function MyPathPage() {
+  const [learningPath, setLearningPath] = useState<GeneratedPath | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set());
+  const [isInitialized, setIsInitialized] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
+
+  // Inicializar con la primera fase expandida
+  useEffect(() => {
+    if (learningPath && learningPath.phases && learningPath.phases.length > 0 && !isInitialized) {
+      setExpandedPhases(new Set([learningPath.phases[0].phase_number]));
+      setIsInitialized(true);
+    }
+  }, [learningPath, isInitialized]);
+
+  const togglePhase = (phaseNumber: number) => {
+    setExpandedPhases(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(phaseNumber)) {
+        newSet.delete(phaseNumber);
+      } else {
+        newSet.add(phaseNumber);
+      }
+      return newSet;
+    });
+  };
+
+  useEffect(() => {
+    async function fetchLearningPath() {
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          router.push('/auth/login');
+          return;
+        }
+
+        // Check if user has a personalized path
+        const { data, error } = await supabase
+          .from('intake_responses')
+          .select('generated_path')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
+          console.error('Error fetching personalized path:', error);
+          setError('Error al cargar tu ruta de aprendizaje');
+          setLoading(false);
+          return;
+        }
+
+        // If no path exists, redirect to onboarding
+        if (!data || !data.generated_path) {
+          router.push('/onboarding');
+          return;
+        }
+
+        // Set the learning path
+        setLearningPath(data.generated_path as GeneratedPath);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching learning path:', err);
+        setError('Error al cargar tu ruta de aprendizaje. Por favor intenta de nuevo.');
+        setLoading(false);
+      }
+    }
+
+    fetchLearningPath();
+  }, [router, supabase]);
+
+  const handleGenerateNewPath = () => {
+    router.push('/onboarding');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
+          <p className="text-lg text-gray-600">Cargando tu ruta de aprendizaje...</p>
+        </div>
+      </div>
+    );
   }
 
-  // Obtener el curso personalizado
-  const { data: intakeResponse } = await supabase
-    .from('intake_responses')
-    .select('generated_path, responses')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  // El curso está directamente en generated_path
-  const course = intakeResponse?.generated_path;
-  const phases = course?.phases || [];
-  const userProject = course?.user_project || 'tu proyecto';
-  const totalVideos = course?.total_videos || 0;
-  const estimatedHours = course?.estimated_hours || '0 horas';
-
-  if (phases.length === 0) {
+  if (error) {
     return (
-      <div className="p-8">
-        <div className="max-w-4xl mx-auto text-center py-12">
-          <div className="text-6xl mb-4">📚</div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            No tienes un curso generado aún
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">
-            Completa el onboarding para generar tu curso personalizado
+      <div className="text-center p-8">
+        <p className="text-red-600 mb-4">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (!learningPath || !learningPath.phases || learningPath.phases.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center p-12 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50">
+          <div className="text-6xl mb-4">🎯</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Aún no tienes una ruta personalizada</h2>
+          <p className="text-lg text-gray-600 mb-6">
+            Crea tu ruta de aprendizaje personalizada basada en tu proyecto
           </p>
-          <a
-            href="/onboarding"
-            className="inline-block bg-gradient-to-r from-purple-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-800"
+          <button
+            onClick={handleGenerateNewPath}
+            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
           >
-            Ir al Onboarding
-          </a>
+            Crear Mi Ruta Personalizada →
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-8 transition-colors">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <a
-            href="/dashboard"
-            className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium mb-4 inline-flex items-center gap-2"
-          >
-            ← Volver al Dashboard
-          </a>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-            Tu Ruta de Aprendizaje Personalizada 🎓
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">{userProject}</p>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border-2 border-purple-200 dark:border-purple-800 transition-colors">
-            <div className="text-3xl mb-2">📹</div>
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{totalVideos}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Videos Totales</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border-2 border-blue-200 dark:border-blue-800 transition-colors">
-            <div className="text-3xl mb-2">🎯</div>
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{phases.length}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Fases de Aprendizaje</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border-2 border-green-200 dark:border-green-800 transition-colors">
-            <div className="text-3xl mb-2">⏱️</div>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{estimatedHours}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Duración Estimada</div>
-          </div>
-        </div>
-
-        {/* Learning Path Summary */}
-        {course?.learning_path_summary && (
-          <div className="bg-gradient-to-r from-purple-600 to-blue-700 rounded-xl shadow-lg p-8 text-white mb-8">
-            <h2 className="text-2xl font-bold mb-4">📍 Tu Camino de Aprendizaje</h2>
-            <ul className="space-y-3">
-              {course.learning_path_summary.map((step: string, index: number) => (
-                <li key={index} className="flex items-start gap-3">
-                  <span className="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    {index + 1}
-                  </span>
-                  <span className="opacity-95">{step}</span>
-                </li>
-              ))}
-            </ul>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="mb-8 pt-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          Mi Ruta de Aprendizaje Personalizada
+        </h1>
+        {learningPath.user_project && (
+          <p className="text-lg text-gray-600 mb-2">
+            <span className="font-semibold">Tu proyecto:</span> {learningPath.user_project}
+          </p>
+        )}
+        {(learningPath.total_videos || learningPath.estimated_hours) && (
+          <div className="flex gap-6 text-sm text-gray-500">
+            {learningPath.total_videos && (
+              <span>📹 {learningPath.total_videos} videos</span>
+            )}
+            {learningPath.estimated_hours && (
+              <span>⏱️ {learningPath.estimated_hours}</span>
+            )}
           </div>
         )}
+      </div>
 
-        {/* Phases with Videos */}
-        <div className="space-y-6">
-          {phases.map((phase: any, phaseIndex: number) => (
-            <div
-              key={phase.phase_number}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 transition-colors"
+      {/* Learning Path Summary */}
+      {learningPath.learning_path_summary && learningPath.learning_path_summary.length > 0 && (
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 mb-8 border border-purple-200">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Resumen de tu Ruta</h2>
+          <ul className="space-y-2">
+            {learningPath.learning_path_summary.map((summary, index) => (
+              <li key={index} className="flex items-start gap-3 text-gray-700">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold">
+                  {index + 1}
+                </span>
+                <span>{summary}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Phases */}
+      <div className="space-y-6">
+        {learningPath.phases.map((phase, phaseIndex) => {
+          const isExpanded = expandedPhases.has(phase.phase_number);
+          
+          return (
+          <div
+            key={phase.phase_number}
+            className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+          >
+            {/* Phase Header - Clickable para toggle */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                togglePhase(phase.phase_number);
+              }}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-left hover:from-purple-700 hover:to-blue-700 transition-all cursor-pointer"
             >
-              {/* Phase Header */}
-              <div className="bg-gradient-to-r from-purple-600 to-blue-700 p-6 text-white">
-                <div className="flex items-center gap-4 mb-2">
-                  <span className="text-4xl">
-                    {['🧠', '🛠️', '🔌', '🚀', '💡', '⚡', '🎯', '📊', '🔥', '✨', '🎨', '🏆'][phaseIndex] || '📚'}
-                  </span>
-                  <div className="flex-1">
-                    <div className="text-sm opacity-80 font-medium">
-                      FASE {phase.phase_number} DE {phases.length}
-                    </div>
-                    <h2 className="text-2xl font-bold">{phase.phase_name}</h2>
+              <div className="flex items-start justify-between flex-wrap gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-3xl font-bold text-white">
+                      {phase.phase_number}
+                    </span>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white">
+                      {phase.phase_name}
+                    </h2>
+                    <svg
+                      className={`w-6 h-6 text-white transition-transform flex-shrink-0 ${
+                        isExpanded ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">{phase.videos?.length || 0}</div>
-                    <div className="text-sm opacity-80">videos</div>
-                  </div>
+                  {phase.description && (
+                    <p className="text-white/90 mt-2">{phase.description}</p>
+                  )}
+                  {phase.phase_duration && (
+                    <p className="text-white/80 text-sm mt-2">
+                      ⏱️ Duración: {phase.phase_duration}
+                    </p>
+                  )}
                 </div>
-                <p className="opacity-90">{phase.description}</p>
-                <div className="mt-2 text-sm opacity-80">
-                  ⏱️ Duración: {phase.phase_duration}
+                <div className="text-white/80 text-sm">
+                  {phase.videos?.length || 0} videos
                 </div>
               </div>
+            </button>
 
-              {/* Videos List */}
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                {phase.videos?.map((video: any) => (
-                  <div
-                    key={video.order}
-                    className="p-6 hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors group"
-                  >
-                    <div className="flex gap-4">
-                      {/* Video Number */}
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-700 text-white flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
-                          {video.order}
-                        </div>
-                      </div>
-
-                      {/* Video Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4 mb-2">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-2 py-1 rounded">
-                                {video.section}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">→</span>
-                              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                                {video.subsection}
-                              </span>
-                            </div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+            {/* Videos List - Collapsible */}
+            {isExpanded && (
+            <div className="p-4 sm:p-6">
+              <div className="space-y-4">
+                {phase.videos && phase.videos.length > 0 ? (
+                  phase.videos.map((video, videoIndex) => (
+                    <div
+                      key={video.order}
+                      className="border border-gray-200 rounded-lg p-4 sm:p-6 hover:border-purple-300 transition-colors"
+                    >
+                      <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">
+                              {video.order}
+                            </span>
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
                               {video.description}
                             </h3>
                           </div>
-                          <div className="flex-shrink-0 text-right">
-                            <div className="text-sm font-bold text-purple-600 dark:text-purple-400">
-                              {video.duration}
+                          
+                          <div className="ml-11 space-y-1">
+                            {video.section && (
+                              <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-medium">
+                                  {video.section}
+                                </span>
+                                {video.subsection && (
+                                  <>
+                                    <span>/</span>
+                                    <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-medium">
+                                      {video.subsection}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                            
+                            {video.why_relevant && (
+                              <p className="text-sm text-gray-600 italic">
+                                💡 {video.why_relevant}
+                              </p>
+                            )}
+                            
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              {video.duration && (
+                                <span>⏱️ {video.duration}</span>
+                              )}
                             </div>
                           </div>
                         </div>
 
-                        {/* Why Relevant */}
-                        <div className="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 dark:border-blue-400 p-3 mt-3 rounded">
-                          <div className="text-xs font-semibold text-blue-900 dark:text-blue-200 mb-1">
-                            💡 Por qué es importante:
-                          </div>
-                          <p className="text-sm text-blue-800 dark:text-blue-300">{video.why_relevant}</p>
-                        </div>
+                        {/* Video Action Button */}
+                        <Link
+                          href={`/dashboard/my-path/video/${phase.phase_number}/${video.order}`}
+                          className="flex-shrink-0 w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg text-center sm:text-left"
+                        >
+                          Ver Video →
+                        </Link>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-4">
+                    No hay videos disponibles en esta fase aún
+                  </p>
+                )}
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Recommendations */}
-        {course?.recommendations && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border-2 border-green-200 dark:border-green-800 mt-8 transition-colors">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">💡 Recomendaciones</h2>
-            <ul className="space-y-3">
-              {course.recommendations.map((rec: string, index: number) => (
-                <li key={index} className="flex items-start gap-3">
-                  <span className="text-green-500 dark:text-green-400 text-xl">✓</span>
-                  <span className="text-gray-700 dark:text-gray-300">{rec}</span>
-                </li>
-              ))}
-            </ul>
+            )}
           </div>
-        )}
-
-        {/* Next Steps */}
-        {course?.next_steps && (
-          <div className="bg-gradient-to-r from-green-600 to-teal-700 rounded-xl shadow-lg p-8 text-white mt-8">
-            <h2 className="text-2xl font-bold mb-4">🚀 Próximos Pasos</h2>
-            <ul className="space-y-3">
-              {course.next_steps.map((step: string, index: number) => (
-                <li key={index} className="flex items-start gap-3">
-                  <span className="bg-white text-green-600 rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    {index + 1}
-                  </span>
-                  <span className="opacity-95">{step}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Start Button */}
-        <div className="mt-8 text-center">
-          <button className="bg-gradient-to-r from-purple-600 to-blue-700 text-white px-12 py-4 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
-            🎬 Comenzar Fase 1: {phases[0]?.phase_name}
-          </button>
-        </div>
+          );
+        })}
       </div>
+
+      {/* Recommendations */}
+      {learningPath.recommendations && learningPath.recommendations.length > 0 && (
+        <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-200">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            💡 Recomendaciones
+          </h2>
+          <ul className="space-y-2">
+            {learningPath.recommendations.map((recommendation, index) => (
+              <li key={index} className="flex items-start gap-3 text-gray-700">
+                <span className="text-blue-600">•</span>
+                <span>{recommendation}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Padding inferior */}
+      <div className="pb-8"></div>
     </div>
   );
 }

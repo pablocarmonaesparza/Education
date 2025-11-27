@@ -1,17 +1,103 @@
 import type { Metadata } from "next";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/shared/Navbar";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import HashScrollHandler from "@/components/shared/HashScrollHandler";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const poppins = Poppins({
+  weight: ["400", "500", "600", "700", "800", "900"],
+  subsets: ["latin"],
+  variable: "--font-poppins",
+});
 
 export const metadata: Metadata = {
-  title: "Inteligencia Artificial y Automatización para Profesionales",
-  description: "Domina la IA y automatización: Desde cero hasta construir y vender tu solución. Aprende con un sistema de personalización con IA adaptado a tu proyecto específico.",
-  keywords: ["IA", "Inteligencia Artificial", "Automatización", "Curso", "LatAm", "Profesionales"],
-  openGraph: {
-    title: "Inteligencia Artificial y Automatización para Profesionales",
-    description: "Domina la IA y automatización: Desde cero hasta construir y vender tu solución",
-    type: "website",
+  metadataBase: new URL('https://tudominio.com'), // Actualizar con tu dominio real
+  title: {
+    default: "Curso de IA Personalizado con Claude | Aprende Automatización con IA",
+    template: "%s | Curso IA Personalizado",
   },
+  description:
+    "Aprende a construir proyectos con IA en 3 semanas. Ruta 100% personalizada por Claude AI. 400+ micro-videos, gamificación, y de la idea al MVP. Garantía de 30 días.",
+  keywords: [
+    "curso inteligencia artificial",
+    "aprender IA",
+    "Claude AI",
+    "automatización con IA",
+    "curso IA personalizado",
+    "MCP",
+    "RAG",
+    "agentes IA",
+    "curso IA latinoamerica",
+    "curso IA español",
+    "micro-learning IA",
+    "programación IA",
+    "proyectos IA",
+    "MVP con IA",
+    "curso online IA",
+  ],
+  authors: [{ name: "Tu Nombre" }], // Actualizar
+  creator: "Tu Nombre", // Actualizar
+  publisher: "Tu Empresa", // Actualizar
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    alternateLocale: ["es_MX", "es_AR", "es_CO"],
+    url: "https://tudominio.com",
+    siteName: "Curso IA Personalizado",
+    title: "Construye Proyectos con IA en 3 Semanas | Ruta Personalizada con Claude",
+    description:
+      "Aprende IA con una ruta 100% personalizada. 400+ videos de 1-3 min, gamificación, y construye tu MVP. 2,500+ estudiantes. 4.9/5 rating. Garantía de 30 días.",
+    images: [
+      {
+        url: "/og-image.jpg", // Crear esta imagen
+        width: 1200,
+        height: 630,
+        alt: "Curso de IA Personalizado con Claude AI",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Curso de IA Personalizado | Construye Tu Proyecto en 3 Semanas",
+    description:
+      "Ruta 100% personalizada por Claude AI. 400+ micro-videos. De la idea al MVP. Únete a 2,500+ estudiantes.",
+    images: ["/twitter-image.jpg"], // Crear esta imagen
+    creator: "@tutwitter", // Actualizar
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "tu-codigo-de-verificacion", // Actualizar con Google Search Console
+  },
+  alternates: {
+    canonical: "https://tudominio.com",
+    languages: {
+      "es-ES": "https://tudominio.com",
+      "es-MX": "https://tudominio.com/mx",
+      "es-AR": "https://tudominio.com/ar",
+      "es-CO": "https://tudominio.com/co",
+    },
+  },
+  category: "education",
 };
 
 export default function RootLayout({
@@ -20,31 +106,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const theme = localStorage.getItem('theme') ||
-                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                  if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
-      <body className="antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" suppressHydrationWarning>
-        <ThemeProvider>
-          <Navbar />
-          <div className="pt-16">
-            {children}
-          </div>
-        </ThemeProvider>
+    <html lang="es" className={`${inter.variable} ${poppins.variable}`}>
+      <body className={`antialiased bg-white text-gray-900`}>
+        <HashScrollHandler />
+        {children}
       </body>
     </html>
   );

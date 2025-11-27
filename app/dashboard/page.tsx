@@ -1,140 +1,200 @@
 import { createClient } from '@/lib/supabase/server';
-import ProgressCard from '@/components/dashboard/ProgressCard';
-import CourseCard from '@/components/dashboard/CourseCard';
+import { redirect } from 'next/navigation';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
 
-  // Obtener el curso personalizado del usuario
-  const { data: intakeResponse } = await supabase
-    .from('intake_responses')
-    .select('generated_path, responses')
-    .eq('user_id', user?.id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  // El curso está directamente en generated_path
-  const course = intakeResponse?.generated_path;
-  const phases = course?.phases || [];
+    if (userError || !user) {
+      redirect('/auth/login');
+    }
 
-  // Convertir fases a formato de secciones para mostrar
-  const sections = phases.map((phase: any) => ({
-    id: phase.phase_number.toString(),
-    title: phase.phase_name,
-    description: phase.description,
-    icon: ['🧠', '🛠️', '🔌', '🚀', '💡', '⚡', '🎯', '📊', '🔥', '✨'][phase.phase_number - 1] || '📚',
-    videoCount: phase.videos?.length || 0,
-    duration: phase.phase_duration,
-    progress: 0,
-  }));
+    // Get user profile data
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('name, email, tier')
+      .eq('id', user.id)
+      .maybeSingle();
 
-  const totalVideos = course?.total_videos || 0;
-  const estimatedHours = course?.estimated_hours || '0 horas';
-  const userProject = course?.user_project || 'tu proyecto';
+    // Get video progress statistics
+    const { count: completedCount } = await supabase
+      .from('video_progress')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('completed', true);
 
-  return (
-    <div className="p-8">
-      {/* Welcome Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          ¡Bienvenido, {user?.user_metadata?.name || 'Estudiante'}! 👋
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Tu curso personalizado para: {userProject}
-        </p>
-      </div>
+    const { count: totalProgressCount } = await supabase
+      .from('video_progress')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
 
-      {/* Progress Summary */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <ProgressCard
-          title="Videos Vistos"
-          progress={0}
-          total={totalVideos}
-          icon={
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          }
-        />
-        <ProgressCard
-          title="Fases Completadas"
-          progress={0}
-          total={phases.length}
-          icon={
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          }
-        />
-        <ProgressCard
-          title="Checkpoints"
-          progress={0}
-          total={24}
-          icon={
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          }
-        />
-      </div>
+    // Get full intake response with project details
+    const { data: intakeResponse } = await supabase
+      .from('intake_responses')
+      .select('id, responses, generated_path')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-      {/* Continue Learning */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tu Curso Personalizado</h2>
-        <div className="bg-gradient-to-r from-purple-600 to-blue-700 rounded-lg p-8 text-white">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold mb-3">🎓 Tu Ruta de Aprendizaje Completa</h3>
-              <p className="opacity-90 text-lg mb-4">
-                {totalVideos} videos personalizados organizados en {phases.length} fases - {estimatedHours}
-              </p>
-              <p className="opacity-80">
-                {phases[0]?.title ? `Comienza con: ${phases[0].title}` : 'Empieza tu viaje de aprendizaje'}
-              </p>
-            </div>
-            <a
-              href="/dashboard/my-path"
-              className="bg-white text-purple-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
-            >
-              Ver Ruta Completa →
-            </a>
-          </div>
+    const hasPersonalizedPath = !!intakeResponse?.generated_path;
+
+    // Redirect to onboarding if user doesn't have a personalized path
+    if (!hasPersonalizedPath) {
+      redirect('/onboarding');
+    }
+
+    const generatedPath = intakeResponse?.generated_path || null;
+    const userResponses = intakeResponse?.responses || {};
+
+    // Calculate total videos from generated path
+    const estimatedTotalVideos = generatedPath?.phases?.reduce(
+      (acc: number, phase: any) => acc + (phase?.videos?.length || 0),
+      0
+    ) || 0;
+
+    const userName = userProfile?.name || userProfile?.email?.split('@')[0] || 'Usuario';
+    const completedVideos = completedCount || 0;
+    const totalVideos = estimatedTotalVideos || totalProgressCount || 0;
+
+    const overallProgress = totalVideos > 0 
+      ? Math.round((completedVideos / totalVideos) * 100) 
+      : 0;
+
+    // Calculate phase progress
+    const totalPhases = generatedPath?.phases?.length || 0;
+    let phasesCompleted = 0;
+    let currentPhase = 1;
+    let currentVideo = 1;
+
+    if (generatedPath?.phases && Array.isArray(generatedPath.phases)) {
+      const { data: allVideoProgress } = await supabase
+        .from('video_progress')
+        .select('video_id, section_id, completed')
+        .eq('user_id', user.id);
+
+      generatedPath.phases.forEach((phase: any, phaseIndex: number) => {
+        const phaseVideos = phase?.videos || [];
+        if (phaseVideos.length === 0) return;
+        
+        const completedInPhase = phaseVideos.filter((video: any) => 
+          allVideoProgress?.some((vp: any) => 
+            vp.video_id === String(video.order) && vp.completed
+          )
+        ).length;
+        
+        if (completedInPhase === phaseVideos.length && phaseVideos.length > 0) {
+          phasesCompleted++;
+        }
+
+        if (currentPhase === phaseIndex + 1 && completedInPhase < phaseVideos.length) {
+          currentVideo = completedInPhase + 1;
+        }
+      });
+    }
+
+    // Get checkpoint submissions
+    const { data: checkpointSubmissions = [] } = await supabase
+      .from('checkpoint_submissions')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('submitted_at', { ascending: false });
+
+    const checkpointResults = (checkpointSubmissions || []).map((cs: any) => ({
+      id: cs.id,
+      title: `Checkpoint ${cs.checkpoint_id}`,
+      validated: cs.validated || false,
+      feedback: cs.feedback || null,
+      submittedAt: cs.submitted_at || null,
+      validatedAt: cs.validated_at || null,
+    }));
+
+    // Calculate time spent
+    const timeSpent = completedVideos * 3;
+    const estimatedTime = totalVideos * 3;
+
+    // Extract project information
+    const userProject = generatedPath?.user_project || userResponses?.project || null;
+    const projectType = generatedPath?.project_type || userResponses?.project_type || null;
+    const skills = generatedPath?.skills_developed || userResponses?.skills || [];
+    const tools = generatedPath?.tools_learned || userResponses?.tools || [];
+
+    // Gamification data
+    const currentXP = completedVideos * 10 + phasesCompleted * 50;
+    const level = Math.floor(currentXP / 100) + 1;
+    const streak = 0;
+    const weeklyGoal = 10;
+    const weeklyProgress = 0;
+    const earnedBadges: string[] = [];
+    
+    if (completedVideos > 0) earnedBadges.push('first-video');
+    if (completedVideos >= 10) earnedBadges.push('videos-10');
+    if (phasesCompleted > 0) earnedBadges.push('first-phase');
+    if (streak >= 3) earnedBadges.push('streak-3');
+
+    // Artifacts
+    const artifacts = (checkpointSubmissions || []).map((cs: any) => ({
+      id: cs.id,
+      name: `Artefacto de ${cs.section_id || 'N/A'}`,
+      description: `Artefacto generado en el checkpoint ${cs.checkpoint_id || 'N/A'}`,
+      phase: 1,
+      phaseName: cs.section_id || 'N/A',
+      status: cs.validated ? 'validated' : cs.submission ? 'completed' : 'pending',
+      submittedAt: cs.submitted_at || null,
+      validatedAt: cs.validated_at || null,
+      fileUrl: cs.file_url || null,
+      feedback: cs.feedback || null,
+    }));
+
+    return (
+      <DashboardContent
+        userName={userName}
+        userEmail={user.email || ''}
+        completedVideos={completedVideos}
+        totalVideos={totalVideos}
+        overallProgress={overallProgress}
+        hasPersonalizedPath={hasPersonalizedPath}
+        userProject={userProject}
+        projectType={projectType}
+        skills={skills}
+        tools={tools}
+        learningPath={generatedPath}
+        userTier={(userProfile?.tier as 'basic' | 'personalized' | 'premium') || 'basic'}
+        phasesCompleted={phasesCompleted}
+        totalPhases={totalPhases}
+        currentPhase={currentPhase}
+        currentVideo={currentVideo}
+        timeSpent={timeSpent}
+        estimatedTime={estimatedTime}
+        artifacts={artifacts}
+        checkpointResults={checkpointResults}
+        weeklyGoal={weeklyGoal}
+        weeklyProgress={weeklyProgress}
+        streak={streak}
+        currentXP={currentXP}
+        level={level}
+        earnedBadges={earnedBadges}
+      />
+    );
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    // Return a simple error page instead of crashing
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Error al cargar el dashboard</h1>
+          <p className="text-gray-600 mb-4">Por favor intenta recargar la página</p>
+          <a 
+            href="/dashboard" 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Recargar
+          </a>
         </div>
       </div>
-
-      {/* Course Grid */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tu Ruta de Aprendizaje Personalizada</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sections.map((section) => (
-            <CourseCard key={section.id} {...section} />
-          ))}
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 transition-colors">
-          <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">{totalVideos}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Videos Totales</div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 transition-colors">
-          <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">{phases.length}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Fases</div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 transition-colors">
-          <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">{estimatedHours}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Duración Total</div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 transition-colors">
-          <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">100%</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Personalizado</div>
-        </div>
-      </div>
-    </div>
-  );
+    );
+  }
 }

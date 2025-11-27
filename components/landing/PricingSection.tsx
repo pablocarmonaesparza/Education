@@ -1,11 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
-type Currency = 'USD' | 'MXN' | 'ARS' | 'COP';
+type Currency = "USD" | "MXN" | "ARS" | "COP";
 
 export default function PricingSection() {
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>('USD');
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>("USD");
+  const router = useRouter();
 
   const exchangeRates = {
     USD: 1,
@@ -17,140 +20,200 @@ export default function PricingSection() {
   const formatPrice = (usdPrice: number) => {
     const price = Math.round(usdPrice * exchangeRates[selectedCurrency]);
     const symbols = {
-      USD: '$',
-      MXN: '$',
-      ARS: '$',
-      COP: '$',
+      USD: "$",
+      MXN: "$",
+      ARS: "$",
+      COP: "$",
     };
     return `${symbols[selectedCurrency]}${price.toLocaleString()}`;
   };
 
+  const handleStripeCheckout = async (priceId: string) => {
+    try {
+      const response = await fetch("/api/stripe/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ priceId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to create checkout session"
+        );
+      }
+
+      const { sessionUrl } = await response.json();
+      router.push(sessionUrl);
+    } catch (error) {
+      console.error("Error during Stripe checkout:", error);
+      alert(
+        "Hubo un problema al iniciar el proceso de pago con Stripe. Por favor, inténtalo de nuevo."
+      );
+    }
+  };
+
   const tiers = [
     {
-      id: 'basic',
-      name: 'Básico',
+      id: "basic",
+      name: "Básico",
       price: 147,
+      originalPrice: 297,
       popular: false,
-      description: 'Acceso completo para aprender a tu ritmo',
+      description: "Acceso completo para aprender a tu ritmo",
       features: [
-        'Acceso a los 400+ micro-videos',
-        'Biblioteca completa de 12 módulos',
-        'Aprendizaje auto-guiado',
-        'Actualizaciones de contenido',
-        'Acceso de por vida',
-        'Subtítulos en español',
+        "Acceso a los 400+ micro-videos",
+        "Biblioteca completa de 12 módulos",
+        "Aprendizaje auto-guiado",
+        "Actualizaciones de contenido",
+        "Acceso de por vida",
       ],
-      cta: 'Comenzar Ahora',
-      gradient: 'from-gray-600 to-gray-700',
+      cta: "Empezar Ahora",
+      stripePriceId: "price_12345_basic",
     },
     {
-      id: 'personalized',
-      name: 'Personalizado',
+      id: "personalized",
+      name: "Personalizado con IA",
       price: 247,
+      originalPrice: 497,
       popular: true,
-      description: 'La experiencia completa con IA',
+      description: "La experiencia completa con IA personalizada",
       features: [
-        'Todo lo del plan Básico',
-        'Ruta personalizada con IA',
-        'Análisis de tu proyecto específico',
-        'Checkpoints adaptativos',
-        'Plantillas de proyectos',
-        'Recomendaciones dinámicas',
-        'Sistema de badges y progreso',
+        "✨ Todo lo del plan Básico",
+        "🤖 Ruta personalizada con Claude AI",
+        "🎯 Análisis de tu proyecto específico",
+        "📊 Checkpoints adaptativos",
+        "🏆 Sistema de badges y progreso",
+        "⚡ Actualizaciones prioritarias",
       ],
-      cta: 'Más Popular',
-      gradient: 'from-purple-600 to-blue-700',
+      cta: "Empieza Tu Ruta Personalizada",
+      stripePriceId: "price_12345_personalized",
     },
     {
-      id: 'premium',
-      name: 'Premium',
+      id: "premium",
+      name: "Premium",
       price: 497,
-      popular: false,
-      description: 'Experiencia completa + mentoría',
+      originalPrice: 997,
+      description: "Experiencia completa + mentoría 1-on-1",
       features: [
-        'Todo lo del plan Personalizado',
-        'Mentoría grupal semanal',
-        'Revisión 1-on-1 de tu proyecto',
-        'Demo Days (presenta tu proyecto)',
-        'Acceso prioritario a actualizaciones',
-        'Comunidad privada Premium',
-        'Certificado de finalización',
-        'Soporte técnico prioritario',
+        "Todo lo del plan Personalizado",
+        "Mentoría grupal semanal en vivo",
+        "2 sesiones 1-on-1 de revisión",
+        "Comunidad privada Premium",
+        "Certificado verificado",
+        "Acceso anticipado a contenido nuevo",
       ],
-      cta: 'Máxima Inversión',
-      gradient: 'from-purple-700 to-blue-800',
+      cta: "Inversión Total",
+      stripePriceId: "price_12345_premium",
     },
   ];
 
   return (
-    <section id="pricing" className="py-20 bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Elige Tu Plan
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-            Inversión única. Acceso de por vida. Sin pagos recurrentes.
-          </p>
+    <section id="pricing" className="relative bg-gradient-to-b from-gray-50 to-white min-h-screen flex items-center justify-center py-20 pt-24 md:pt-28 overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -right-32 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
+        <div className="absolute bottom-1/4 -left-32 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
+      </div>
 
-          {/* Currency Selector */}
-          <div className="flex justify-center gap-2 flex-wrap">
-            {(['USD', 'MXN', 'ARS', 'COP'] as Currency[]).map((currency) => (
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center text-gray-900 mb-4 leading-tight">
+            Invierte En Ti
+          </h2>
+          <p className="text-xl md:text-2xl text-center text-gray-600 mb-16 max-w-3xl mx-auto font-light">
+            Construye tu proyecto en semanas, no meses.
+            <br />
+            <span className="text-purple-600 font-semibold">Garantía de devolución de 30 días si no estás satisfecho.</span>
+          </p>
+        </motion.div>
+
+        {/* Currency Selector */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="flex justify-center mb-12"
+        >
+          <div className="bg-white rounded-full p-1 flex space-x-1 shadow-lg border border-gray-200">
+            {(["USD", "MXN", "ARS", "COP"] as Currency[]).map((currency) => (
               <button
                 key={currency}
                 onClick={() => setSelectedCurrency(currency)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                className={`px-6 py-2 rounded-full font-semibold transition-all ${
                   selectedCurrency === currency
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 {currency}
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Pricing Cards */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-12">
-          {tiers.map((tier) => (
-            <div
+        <div className="grid lg:grid-cols-3 gap-4 md:gap-6 max-w-7xl mx-auto">
+          {tiers.map((tier, index) => (
+            <motion.div
               key={tier.id}
-              className={`relative rounded-2xl p-8 ${
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 * (index + 3) }}
+              className={`relative rounded-2xl p-5 md:p-6 transition-all duration-300 flex flex-col ${
                 tier.popular
-                  ? 'bg-gradient-to-br from-purple-900 to-blue-900 ring-4 ring-purple-500 shadow-2xl transform lg:-translate-y-4'
-                  : 'bg-gray-800'
+                  ? "bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-500 shadow-xl"
+                  : "bg-white shadow-md hover:shadow-lg border border-gray-200"
               }`}
             >
               {/* Popular Badge */}
               {tier.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-purple-400 to-purple-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
-                    ⭐ MÁS POPULAR
-                  </span>
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md">
+                    🔥 MÁS POPULAR
+                  </div>
                 </div>
               )}
 
-              {/* Tier Header */}
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
-                <p className="text-gray-400 text-sm mb-4">{tier.description}</p>
-                <div className="mb-2">
-                  <span className="text-5xl font-bold">{formatPrice(tier.price)}</span>
-                  <span className="text-gray-400 ml-2">{selectedCurrency}</span>
-                </div>
-                <p className="text-sm text-gray-400">Pago único • Acceso de por vida</p>
+              {/* Title */}
+              <div className="mb-2">
+                <h3 className="text-lg md:text-xl font-bold text-gray-900">{tier.name}</h3>
               </div>
 
-              {/* Features List */}
-              <ul className="space-y-3 mb-8">
-                {tier.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-3">
+              <p className="text-gray-600 text-xs mb-3">{tier.description}</p>
+
+              {/* Pricing */}
+              <div className="mb-3">
+                <div className="flex items-end gap-2 mb-1">
+                  <span className="text-gray-400 line-through text-lg">
+                    {formatPrice(tier.originalPrice)}
+                  </span>
+                  <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">
+                    50% OFF
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    {formatPrice(tier.price)}
+                  </span>
+                  <span className="text-gray-500 text-xs md:text-sm">{selectedCurrency}</span>
+                </div>
+                <p className="text-xs md:text-sm text-gray-500 mt-1">Pago único • Acceso de por vida</p>
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-1.5 mb-3 flex-1 max-h-[200px] overflow-y-auto pr-1">
+                {tier.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-1.5">
                     <svg
-                      className={`w-6 h-6 flex-shrink-0 ${
-                        tier.popular ? 'text-purple-300' : 'text-purple-400'
-                      }`}
+                      className="w-4 h-4 flex-shrink-0 text-green-500 mt-0.5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -162,47 +225,27 @@ export default function PricingSection() {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    <span className="text-gray-300">{feature}</span>
+                    <span className="text-xs md:text-sm text-gray-700 leading-snug">{feature}</span>
                   </li>
                 ))}
               </ul>
 
               {/* CTA Button */}
               <button
-                className={`w-full py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 ${
+                onClick={() => handleStripeCheckout(tier.stripePriceId)}
+                className={`w-full py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 mt-auto ${
                   tier.popular
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-700 hover:from-purple-700 hover:to-blue-800 text-white shadow-lg'
-                    : 'bg-gray-700 hover:bg-gray-600 text-white'
+                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md hover:shadow-lg"
+                    : "bg-white text-purple-600 border-2 border-purple-600 hover:bg-purple-50"
                 }`}
               >
-                {tier.cta}
+                {tier.cta} →
               </button>
-            </div>
+
+            </motion.div>
           ))}
         </div>
 
-        {/* Money-Back Guarantee */}
-        <div className="bg-purple-900 bg-opacity-30 border border-purple-500 rounded-xl p-6 max-w-3xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <svg className="w-8 h-8 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <h3 className="text-2xl font-bold text-purple-300">Garantía de Satisfacción</h3>
-          </div>
-          <p className="text-gray-300">
-            Prueba el curso durante 30 días. Si no estás satisfecho, te devolvemos el 100% de tu dinero. Sin preguntas.
-          </p>
-        </div>
-
-        {/* FAQ Note */}
-        <div className="text-center mt-12">
-          <p className="text-gray-400">
-            ¿Tienes preguntas sobre qué plan elegir?{' '}
-            <a href="#faq" className="text-purple-400 hover:text-purple-300 underline">
-              Consulta las preguntas frecuentes
-            </a>
-          </p>
-        </div>
       </div>
     </section>
   );

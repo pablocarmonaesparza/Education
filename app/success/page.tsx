@@ -1,0 +1,35 @@
+import Navbar from '@/components/shared/Navbar';
+import Footer from '@/components/shared/Footer';
+import Link from 'next/link';
+
+export default function SuccessPage() {
+  return (
+    <main className="min-h-screen flex flex-col">
+      <Navbar />
+      <section className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center text-center">
+        <svg
+          className="w-24 h-24 text-green-500 mb-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <h1 className="text-4xl font-bold mb-4">¡Pago Exitoso!</h1>
+        <p className="text-lg text-gray-700 mb-8">
+          Tu compra se ha completado con éxito. ¡Gracias!
+        </p>
+        <Link href="/dashboard" className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
+          Ir al Dashboard
+        </Link>
+      </section>
+      <Footer />
+    </main>
+  );
+}

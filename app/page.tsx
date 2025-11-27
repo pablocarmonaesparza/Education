@@ -1,18 +1,20 @@
-import HeroSection from '@/components/landing/HeroSection';
-import ProblemSolutionSection from '@/components/landing/ProblemSolutionSection';
-import DifferentiatorsSection from '@/components/landing/DifferentiatorsSection';
-import CourseStructureSection from '@/components/landing/CourseStructureSection';
-import PricingSection from '@/components/landing/PricingSection';
-import FAQSection from '@/components/landing/FAQSection';
-import Footer from '@/components/shared/Footer';
+import HeroSection from "@/components/landing/HeroSection";
+import AvailableCoursesSection from "@/components/landing/AvailableCoursesSection";
+import HowItWorksSection from "@/components/landing/HowItWorksSection";
+import PricingSection from "@/components/landing/PricingSection";
+import FAQSection from "@/components/landing/FAQSection";
+import Footer from "@/components/shared/Footer";
+import Navbar from "@/components/shared/Navbar";
+import StructuredData from "@/components/shared/StructuredData";
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-white">
+      <Navbar />
+      <StructuredData />
       <HeroSection />
-      <ProblemSolutionSection />
-      <DifferentiatorsSection />
-      <CourseStructureSection />
+      <AvailableCoursesSection />
+      <HowItWorksSection />
       <PricingSection />
       <FAQSection />
       <Footer />

@@ -24,7 +24,7 @@ export default function CourseCard({
   return (
     <Link
       href={`/dashboard/course/${id}`}
-      className="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500 group"
+      className="block bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-purple-300 group"
     >
       {/* Header */}
       <div className="relative bg-gradient-to-br from-purple-600 to-blue-700 p-6">
@@ -41,9 +41,9 @@ export default function CourseCard({
 
       {/* Body */}
       <div className="p-6">
-        <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{description}</p>
+        <p className="text-gray-600 mb-4 line-clamp-2">{description}</p>
 
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -61,7 +61,7 @@ export default function CourseCard({
         {/* Progress Bar */}
         {progress > 0 && (
           <div className="mt-4">
-            <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-purple-600 to-blue-700 rounded-full transition-all duration-500"
                 style={{ width: `${progress}%` }}

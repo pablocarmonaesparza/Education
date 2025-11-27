@@ -35,7 +35,7 @@ export default function ProblemSolutionSection() {
     },
     {
       icon: "🎨",
-      title: "Solo lo Relevante",
+      title: "Solo Lo Relevante",
       description: "Tu ruta incluye SOLO los módulos que necesitas para tu proyecto específico.",
     },
     {
@@ -61,7 +61,7 @@ export default function ProblemSolutionSection() {
         {/* Problems Grid */}
         <div className="mb-20">
           <h3 className="text-2xl font-bold text-center text-gray-800 mb-8">
-            Los Problemas que Enfrentas
+            Los Problemas Que Enfrentas
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {problems.map((problem, index) => (
