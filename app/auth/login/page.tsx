@@ -3,8 +3,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Footer from '@/components/shared/Footer';
-import AuthNavbar from '@/components/auth/AuthNavbar';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
@@ -13,10 +11,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  
+
   // Lazy initialization of Supabase client to avoid SSR issues
   const [supabase, setSupabase] = useState<any>(null);
-  
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Check if Supabase is configured before trying to create client
@@ -42,7 +40,7 @@ export default function LoginPage() {
   // Verificar si Supabase está configurado
   const isSupabaseConfigured = () => {
     if (typeof window === 'undefined') return false;
-    
+
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -79,12 +77,12 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!supabase) {
       setError('Supabase no está inicializado. Por favor recarga la página.');
       return;
     }
-    
+
     setLoading(true);
     setError(null);
 
@@ -112,7 +110,7 @@ export default function LoginPage() {
       setError('Supabase no está inicializado. Por favor recarga la página.');
       return;
     }
-    
+
     setLoading(true);
     setError(null);
 
@@ -143,57 +141,48 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-[#1472FF]/10 via-[#5BA0FF]/10 to-[#1472FF]/10">
-      <AuthNavbar />
-      {/* Background decoration - Enhanced for glassmorphism */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Base gradient overlay - more vibrant */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1472FF]/20 via-[#5BA0FF]/20 to-[#1472FF]/20" />
-        
-        {/* Animated orbs - more visible */}
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#1472FF] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-2xl opacity-50" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#1472FF] rounded-full mix-blend-multiply filter blur-2xl opacity-50" />
-        
-        {/* Additional layers for depth */}
-        <div className="absolute top-1/3 right-1/4 w-48 h-48 bg-pink-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40" />
-        <div className="absolute bottom-1/3 left-1/4 w-48 h-48 bg-cyan-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40" />
-      </div>
+    <main className="min-h-screen flex bg-gray-950">
+      {/* Left Panel - Form */}
+      <div className="w-full lg:w-[480px] min-h-screen flex flex-col bg-white">
+        {/* Logo */}
+        <div className="p-8">
+          <Link href="/" className="inline-block">
+            <span className="text-2xl font-bold text-[#1472FF]">Leap</span>
+          </Link>
+        </div>
 
-      <section className="min-h-screen flex items-center justify-center py-12 md:py-20 px-4 relative z-10">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl p-8 md:p-10 shadow-xl">
+        {/* Form Container */}
+        <div className="flex-1 flex items-center justify-center px-8 pb-8">
+          <div className="w-full max-w-sm">
             {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                Inicia Sesión
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Bienvenido de vuelta
               </h1>
               <p className="text-gray-600">
-                Continúa tu aprendizaje en IA y automatización
+                Continúa tu aprendizaje en IA
               </p>
             </div>
 
             {/* Advertencia si Supabase no está configurado */}
             {!isSupabaseConfigured() && (
-              <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
                 <div className="flex items-start gap-3">
-                  <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   <div className="flex-1">
-                    <p className="text-yellow-800 text-sm font-semibold mb-2">
-                      ⚠️ Base de datos no configurada
+                    <p className="text-yellow-800 text-sm font-medium mb-1">
+                      Base de datos no configurada
                     </p>
                     <p className="text-yellow-700 text-sm mb-3">
-                      Supabase aún no está configurado. Puedes explorar la plataforma en modo demo.
+                      Explora la plataforma en modo demo.
                     </p>
                     <Link
                       href="/demo"
-                      className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                      className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                     >
-                      🎯 Ver Demo del Dashboard
+                      Ver Demo
                     </Link>
                   </div>
                 </div>
@@ -202,55 +191,17 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-600 text-sm text-center">{error}</p>
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
 
-            {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="email"
-                id="email"
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
-                placeholder="Correo electrónico"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-
-              <input
-                type="password"
-                id="password"
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
-                placeholder="Contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white py-3 rounded-lg font-semibold hover:from-[#0E5FCC] hover:to-[#1472FF] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
-              >
-                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="mt-6 mb-4 flex items-center">
-              <div className="flex-1 border-t border-gray-300"></div>
-              <span className="px-4 text-sm text-gray-500">O continúa con</span>
-              <div className="flex-1 border-t border-gray-300"></div>
-            </div>
-
-            {/* Google OAuth */}
+            {/* Google OAuth Button */}
             <button
               type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+              className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-3 px-4 rounded-xl font-medium border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -273,17 +224,89 @@ export default function LoginPage() {
               <span>{loading ? 'Conectando...' : 'Continuar con Google'}</span>
             </button>
 
+            {/* Divider */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <span className="text-sm text-gray-500">o</span>
+              <div className="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <input
+                  type="email"
+                  id="email"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
+                  placeholder="Correo electrónico"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <input
+                  type="password"
+                  id="password"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
+                  placeholder="Contraseña"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#1472FF] text-white py-3 rounded-xl font-semibold hover:bg-[#0E5FCC] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              </button>
+            </form>
+
             {/* Signup Link */}
             <p className="mt-6 text-center text-sm text-gray-600">
-            ¿No tienes cuenta?{' '}
+              ¿No tienes cuenta?{' '}
               <Link href="/auth/signup" className="text-[#1472FF] hover:text-[#0E5FCC] font-semibold">
                 Regístrate gratis
               </Link>
-          </p>
+            </p>
           </div>
         </div>
-      </section>
-      <Footer />
+      </div>
+
+      {/* Right Panel - Gradient Background */}
+      <div className="hidden lg:flex flex-1 relative overflow-hidden">
+        {/* Blue Gradient Base */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1472FF] via-[#3B82F6] to-[#1E40AF]" />
+
+        {/* Gradient Layers */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1472FF]/50 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 via-transparent to-indigo-600/30" />
+
+        {/* Animated Cloud Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/10 rounded-full filter blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-300/20 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-indigo-400/15 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/3 left-1/3 w-72 h-72 bg-cyan-300/10 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
+
+        {/* Content Overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
+          <div className="max-w-md">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Continúa aprendiendo
+            </h2>
+            <p className="text-xl text-white/80 leading-relaxed">
+              Retoma tu ruta personalizada y sigue construyendo proyectos con IA.
+            </p>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

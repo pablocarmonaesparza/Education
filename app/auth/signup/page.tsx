@@ -3,8 +3,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Footer from '@/components/shared/Footer';
-import AuthNavbar from '@/components/auth/AuthNavbar';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SignupPage() {
@@ -16,13 +14,11 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
-  
-  // Lazy initialization of Supabase client to avoid SSR issues
+
   const [supabase, setSupabase] = useState<any>(null);
-  
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Check if Supabase is configured before trying to create client
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -37,16 +33,14 @@ export default function SignupPage() {
           setSupabase(createClient());
         } catch (error: any) {
           console.error('Error initializing Supabase client:', error);
-          // Don't set error state - let the warning banner handle it
         }
       }
     }
   }, []);
 
-  // Verificar si Supabase está configurado
   const isSupabaseConfigured = () => {
     if (typeof window === 'undefined') return false;
-    
+
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -58,7 +52,6 @@ export default function SignupPage() {
   };
 
   const translateError = (errorMessage: string): string => {
-    // Error especial cuando Supabase no está configurado
     if (errorMessage.includes('Failed to fetch') ||
         errorMessage.includes('fetch') ||
         errorMessage.includes('NetworkError')) {
@@ -85,12 +78,12 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!supabase) {
       setError('Supabase no está inicializado. Por favor recarga la página.');
       return;
     }
-    
+
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -117,7 +110,6 @@ export default function SignupPage() {
         setError(translateError(signUpError.message));
       } else {
         setSuccess('¡Cuenta creada! Revisa tu email para confirmar tu cuenta.');
-        // Limpiar el formulario
         setEmail('');
         setPassword('');
         setName('');
@@ -134,7 +126,7 @@ export default function SignupPage() {
       setError('Supabase no está inicializado. Por favor recarga la página.');
       return;
     }
-    
+
     setLoading(true);
     setError(null);
 
@@ -154,9 +146,6 @@ export default function SignupPage() {
         setLoading(false);
         return;
       }
-
-      // If data.url exists, Supabase will handle the redirect automatically
-      // Don't set loading to false as we're redirecting
     } catch (err: any) {
       console.error('Google OAuth error:', err);
       setError(translateError(err.message || 'Error al iniciar sesión con Google'));
@@ -165,31 +154,22 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-[#1472FF]/10 via-[#5BA0FF]/10 to-[#1472FF]/10">
-      <AuthNavbar />
-      {/* Background decoration - Enhanced for glassmorphism */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Base gradient overlay - more vibrant */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1472FF]/20 via-[#5BA0FF]/20 to-[#1472FF]/20" />
-        
-        {/* Animated orbs - more visible */}
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#1472FF] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-2xl opacity-50" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#1472FF] rounded-full mix-blend-multiply filter blur-2xl opacity-50" />
-        
-        {/* Additional layers for depth */}
-        <div className="absolute top-1/3 right-1/4 w-48 h-48 bg-pink-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40" />
-        <div className="absolute bottom-1/3 left-1/4 w-48 h-48 bg-cyan-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40" />
-      </div>
+    <main className="min-h-screen flex bg-gray-950">
+      {/* Left Panel - Form */}
+      <div className="w-full lg:w-[480px] min-h-screen flex flex-col bg-white">
+        {/* Logo */}
+        <div className="p-8">
+          <Link href="/" className="inline-block">
+            <span className="text-2xl font-bold text-[#1472FF]">Leap</span>
+          </Link>
+        </div>
 
-      <section className="min-h-screen flex items-center justify-center py-12 md:py-20 px-4 relative z-10">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl p-8 md:p-10 shadow-xl">
+        {/* Form Container */}
+        <div className="flex-1 flex items-center justify-center px-8 pb-8">
+          <div className="w-full max-w-sm">
             {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Crea Tu Cuenta
               </h1>
               <p className="text-gray-600">
@@ -197,25 +177,25 @@ export default function SignupPage() {
               </p>
             </div>
 
-            {/* Advertencia si Supabase no está configurado */}
+            {/* Warning if Supabase not configured */}
             {!isSupabaseConfigured() && (
-              <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+              <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-xl">
                 <div className="flex items-start gap-3">
-                  <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   <div className="flex-1">
-                    <p className="text-yellow-800 text-sm font-semibold mb-2">
-                      ⚠️ Base de datos no configurada
+                    <p className="text-yellow-800 text-sm font-semibold mb-1">
+                      Base de datos no configurada
                     </p>
                     <p className="text-yellow-700 text-sm mb-3">
-                      Supabase aún no está configurado. Puedes explorar la plataforma en modo demo.
+                      Supabase aún no está configurado. Explora en modo demo.
                     </p>
                     <Link
                       href="/demo"
-                      className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                      className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
                     >
-                      🎯 Ver Demo del Dashboard
+                      Ver Demo
                     </Link>
                   </div>
                 </div>
@@ -224,24 +204,23 @@ export default function SignupPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-600 text-sm text-center">{error}</p>
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
 
             {/* Success Message */}
             {success && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-600 text-sm text-center">{success}</p>
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                <p className="text-green-600 text-sm">{success}</p>
               </div>
             )}
 
             {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
-                id="name"
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
                 placeholder="Nombre completo"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -250,8 +229,7 @@ export default function SignupPage() {
 
               <input
                 type="email"
-                id="email"
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
                 placeholder="Correo electrónico"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -259,20 +237,19 @@ export default function SignupPage() {
               />
 
               <div className="relative">
-              <input
+                <input
                   type={showPassword ? "text" : "password"}
-                id="password"
-                  className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
+                  className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1472FF] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
                   placeholder="Contraseña (mínimo 6 caracteres)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   minLength={6}
-              />
+                />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,22 +262,22 @@ export default function SignupPage() {
                     </svg>
                   )}
                 </button>
-            </div>
+              </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white py-3 rounded-lg font-semibold hover:from-[#0E5FCC] hover:to-[#1472FF] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                className="w-full bg-[#1472FF] hover:bg-[#0E5FCC] text-white py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
               </button>
             </form>
 
             {/* Divider */}
-            <div className="mt-6 mb-4 flex items-center">
-              <div className="flex-1 border-t border-gray-300"></div>
-              <span className="px-4 text-sm text-gray-500">O continúa con</span>
-              <div className="flex-1 border-t border-gray-300"></div>
+            <div className="my-6 flex items-center">
+              <div className="flex-1 border-t border-gray-200"></div>
+              <span className="px-4 text-sm text-gray-400">o continúa con</span>
+              <div className="flex-1 border-t border-gray-200"></div>
             </div>
 
             {/* Google OAuth */}
@@ -308,40 +285,53 @@ export default function SignupPage() {
               type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+              className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-3 rounded-xl font-medium border border-gray-200 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              <span>{loading ? 'Conectando...' : 'Continuar con Google'}</span>
+              <span>Continuar con Google</span>
             </button>
 
             {/* Login Link */}
-            <p className="mt-6 text-center text-sm text-gray-600">
-            ¿Ya tienes cuenta?{' '}
+            <p className="mt-8 text-center text-sm text-gray-600">
+              ¿Ya tienes cuenta?{' '}
               <Link href="/auth/login" className="text-[#1472FF] hover:text-[#0E5FCC] font-semibold">
                 Inicia sesión
               </Link>
-          </p>
+            </p>
           </div>
         </div>
-      </section>
-      <Footer />
+      </div>
+
+      {/* Right Panel - Gradient Background */}
+      <div className="hidden lg:flex flex-1 relative overflow-hidden">
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1472FF] via-[#5BA0FF] to-[#1472FF]" />
+
+        {/* Animated orbs */}
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-white/10 rounded-full mix-blend-overlay filter blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-white/10 rounded-full mix-blend-overlay filter blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 rounded-full mix-blend-overlay filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+
+        {/* Content overlay */}
+        <div className="absolute inset-0 flex items-center justify-center p-12">
+          <div className="text-center text-white max-w-md">
+            <h2 className="text-4xl font-bold mb-4">
+              Aprende IA de forma práctica
+            </h2>
+            <p className="text-xl text-white/80">
+              +1,000 videos personalizados para llevar tu idea al siguiente nivel
+            </p>
+          </div>
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
+      </div>
     </main>
   );
 }
