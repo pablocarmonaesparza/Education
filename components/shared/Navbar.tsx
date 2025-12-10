@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,41 +8,63 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [pastHero, setPastHero] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const navRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  const navLinks = [
+    { href: "#how-it-works", label: "Cómo Funciona", id: "how-it-works" },
+    { href: "#available-courses", label: "Cursos", id: "available-courses" },
+    { href: "#about", label: "Acerca De", id: "about" },
+    { href: "#pricing", label: "Precios", id: "pricing" },
+    { href: "#faq", label: "FAQ", id: "faq" },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       setScrolled(scrollY > 20);
-      
-      // Detect when past hero section - check actual hero section height
-      const heroSection = document.querySelector('section:first-of-type');
-      if (heroSection) {
-        const heroRect = heroSection.getBoundingClientRect();
-        const heroBottom = heroRect.bottom + scrollY;
-        // Only change when completely past the hero section
-        setPastHero(scrollY >= heroBottom - 100);
-      } else {
-        // Fallback: use viewport height
-        const heroHeight = window.innerHeight;
-        setPastHero(scrollY >= heroHeight - 50);
+
+      // Detect active section
+      const navHeight = 100;
+      let currentSection: string | null = null;
+
+      for (const link of navLinks) {
+        const section = document.getElementById(link.id);
+        if (section) {
+          const rect = section.getBoundingClientRect();
+          // Check if section is in view (with some tolerance)
+          if (rect.top <= navHeight + 50 && rect.bottom > navHeight) {
+            currentSection = link.id;
+          }
+        }
       }
+
+      setActiveSection(currentSection);
     };
-    
+
     // Initial check
     handleScroll();
-    
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { href: "#available-courses", label: "Curso" },
-    { href: "#how-it-works", label: "Cómo Funciona" },
-    { href: "#pricing", label: "Precios" },
-    { href: "#faq", label: "FAQ" },
-  ];
+  // Update indicator position when active section changes
+  useEffect(() => {
+    if (activeSection && navRef.current) {
+      const activeLink = navRef.current.querySelector(`[data-section="${activeSection}"]`) as HTMLElement;
+      if (activeLink) {
+        const navRect = navRef.current.getBoundingClientRect();
+        const linkRect = activeLink.getBoundingClientRect();
+        setIndicatorStyle({
+          left: linkRect.left - navRect.left,
+          width: linkRect.width,
+        });
+      }
+    }
+  }, [activeSection]);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
@@ -71,8 +93,8 @@ export default function Navbar() {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        pastHero
-          ? "backdrop-blur-md"
+        scrolled
+          ? "backdrop-blur-md bg-white/80 dark:bg-gray-950/80"
           : ""
       }`}
     >
@@ -85,16 +107,17 @@ export default function Navbar() {
               whileTap={{ scale: 0.95 }}
               className="text-2xl font-bold"
             >
-              <span className={`transition-colors duration-300 ${
-                pastHero ? "text-[#1472FF]" : "text-[#111827]"
-              }`}>
+              <span className="text-[#1472FF] transition-colors duration-300">
                 Leap
               </span>
             </motion.div>
           </Link>
 
-          {/* Desktop Navigation - Centered */}
-          <div className="hidden md:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2">
+          {/* Desktop Navigation - Centered on page */}
+          <div
+            ref={navRef}
+            className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2"
+          >
             {navLinks.map((link, index) => (
               <motion.div
                 key={link.href}
@@ -104,20 +127,35 @@ export default function Navbar() {
               >
                 <a
                   href={link.href}
+                  data-section={link.id}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className={`relative transition-colors font-medium cursor-pointer ${
-                    pastHero
-                      ? "text-gray-600 hover:text-gray-900"
-                      : scrolled
-                      ? "text-gray-600 hover:text-gray-900"
-                      : "text-white hover:text-white/80"
+                  className={`relative transition-colors duration-300 font-medium cursor-pointer pb-1 ${
+                    activeSection === link.id
+                      ? "text-[#1472FF]"
+                      : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
                   {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] hover:w-full transition-all duration-300" />
                 </a>
               </motion.div>
             ))}
+
+            {/* Sliding indicator */}
+            {activeSection && (
+              <motion.div
+                className="absolute bottom-0 h-0.5 bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] rounded-full"
+                initial={false}
+                animate={{
+                  left: indicatorStyle.left,
+                  width: indicatorStyle.width,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 350,
+                  damping: 30,
+                }}
+              />
+            )}
           </div>
 
           {/* Desktop CTA */}
@@ -125,22 +163,16 @@ export default function Navbar() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4, duration: 0.4 }}
-            className="hidden md:flex items-center ml-auto"
+            className="hidden md:flex items-center"
           >
             <Link
               href="/auth/signup"
-              className={`px-6 py-2.5 rounded-full font-semibold transition-all duration-300 hover:scale-105 active:scale-95 inline-flex items-center gap-2 ${
-                pastHero
-                  ? "navbar-button-gradient text-white hover:opacity-90"
-                  : "bg-white text-[#1472FF] hover:bg-gray-100 shadow-lg hover:shadow-xl"
-              }`}
+              className="px-6 py-2.5 rounded-full font-semibold transition-all duration-300 hover:scale-105 active:scale-95 inline-flex items-center gap-2 navbar-button-gradient text-white hover:opacity-90"
             >
               <span className="flex items-center gap-2">
-                Regístrate
+                Regístrate Gratis
                 <svg
-                  className={`w-4 h-4 transition-transform ${
-                    pastHero ? "text-white" : "text-[#1472FF]"
-                  }`}
+                  className="w-4 h-4 transition-transform text-white"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -160,29 +192,21 @@ export default function Navbar() {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`md:hidden relative w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
-              pastHero || scrolled ? "hover:bg-gray-100" : "hover:bg-white/10"
-            }`}
+            className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             aria-label="Toggle menu"
           >
             <div className="w-6 h-5 flex flex-col justify-between">
               <motion.span
                 animate={mobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-                className={`w-full h-0.5 rounded-full origin-center transition-all ${
-                  pastHero || scrolled ? "bg-gray-900" : "bg-white"
-                }`}
+                className="w-full h-0.5 rounded-full origin-center transition-all bg-gray-900 dark:bg-white"
               />
               <motion.span
                 animate={mobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                className={`w-full h-0.5 rounded-full transition-all ${
-                  scrolled ? "bg-gray-900" : "bg-white"
-                }`}
+                className="w-full h-0.5 rounded-full transition-all bg-gray-900 dark:bg-white"
               />
               <motion.span
                 animate={mobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-                className={`w-full h-0.5 rounded-full origin-center transition-all ${
-                  pastHero || scrolled ? "bg-gray-900" : "bg-white"
-                }`}
+                className="w-full h-0.5 rounded-full origin-center transition-all bg-gray-900 dark:bg-white"
               />
             </div>
           </motion.button>
@@ -197,7 +221,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden bg-white/95 backdrop-blur-lg border-t border-gray-200/50"
+            className="md:hidden overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200/50 dark:border-gray-700/50"
           >
             <div className="container mx-auto px-4 py-6">
               <div className="flex flex-col gap-4">
@@ -211,7 +235,11 @@ export default function Navbar() {
                     <a
                       href={link.href}
                       onClick={(e) => handleNavClick(e, link.href)}
-                      className="block py-3 px-4 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all font-medium cursor-pointer"
+                      className={`block py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all font-medium cursor-pointer ${
+                        activeSection === link.id
+                          ? "text-[#1472FF] bg-blue-50 dark:bg-blue-900/30"
+                          : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      }`}
                     >
                       {link.label}
                     </a>
@@ -222,18 +250,14 @@ export default function Navbar() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.3 }}
-                  className="pt-4 border-t border-gray-200"
-                  >
+                  className="pt-4 border-t border-gray-200 dark:border-gray-700"
+                >
                   <Link
                     href="/auth/signup"
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`block py-3 px-4 text-center font-semibold rounded-lg transition-all ${
-                      pastHero
-                        ? "navbar-button-gradient text-white hover:opacity-90"
-                        : "bg-white text-[#1472FF] hover:bg-gray-100 shadow-lg"
-                    }`}
+                    className="block py-3 px-4 text-center font-semibold rounded-lg transition-all navbar-button-gradient text-white hover:opacity-90"
                   >
-                    Regístrate
+                    Regístrate Gratis
                   </Link>
                 </motion.div>
               </div>

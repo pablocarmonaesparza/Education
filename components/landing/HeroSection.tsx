@@ -77,55 +77,58 @@ export default function HeroSection() {
         >
           <Link
             href="/auth/signup"
-            className="group relative px-8 py-4 rounded-full font-semibold text-base bg-white text-[#1472FF] hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+            className="group relative px-6 py-2.5 rounded-full font-semibold text-base bg-[#111827] text-white hover:bg-[#1f2937] transition-all duration-300 hover:scale-105 active:scale-95 inline-flex items-center gap-2"
           >
-            <span className="relative flex items-center justify-center gap-2">
-              Empieza Gratis Ahora
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </span>
+            Empieza Gratis Ahora
+            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
           </Link>
           <Link
             href="/#how-it-works"
-            className="group px-8 py-4 rounded-full font-semibold text-base bg-transparent border-2 border-white text-white hover:bg-white/10 hover:border-white transition-all duration-300 hover:scale-105"
+            className="group px-6 py-2.5 rounded-full font-semibold text-base bg-transparent border-2 border-white text-white hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
           >
             Ver Cómo Funciona
           </Link>
         </motion.div>
 
-        {/* Badge - moved below with proportional spacing */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium mb-10"
-        >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-          </span>
-          ¡400+ videos personalizados con IA!
-        </motion.div>
-
       </div>
 
-      {/* Scroll indicator */}
+      {/* Next section indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1 }}
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
       >
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="text-white/40 text-center"
+        <button
+          onClick={() => {
+            const element = document.getElementById("available-courses");
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+          className="flex flex-col items-center gap-1 cursor-pointer group"
         >
-          <svg className="w-6 h-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
-        </motion.div>
+          <span className="text-sm font-semibold tracking-wide text-white/40 group-hover:text-white/60 transition-colors">
+            Curso
+          </span>
+          <motion.svg
+            className="w-5 h-5 text-white/40 group-hover:text-white/60 transition-colors"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </motion.svg>
+        </button>
       </motion.div>
     </section>
   );

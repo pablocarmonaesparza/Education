@@ -2,9 +2,9 @@
 
 import { motion } from "framer-motion";
 
-export default function HowItWorksSection() {
+export default function AboutSection() {
   return (
-    <section id="how-it-works" className="relative min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-950 overflow-hidden">
+    <section id="about" className="relative min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-950 overflow-hidden">
       {/* Background decoration - Subtle */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#1472FF]/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
@@ -21,7 +21,7 @@ export default function HowItWorksSection() {
           className="text-center mb-10 md:mb-12"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
-            Cómo Funciona
+            Acerca De
           </h2>
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light">
             Próximamente...
@@ -52,7 +52,7 @@ export default function HowItWorksSection() {
       >
         <button
           onClick={() => {
-            const element = document.getElementById("available-courses");
+            const element = document.getElementById("pricing");
             if (element) {
               element.scrollIntoView({ behavior: "smooth" });
             }
@@ -60,7 +60,7 @@ export default function HowItWorksSection() {
           className="flex flex-col items-center gap-1 cursor-pointer group"
         >
           <span className="text-sm font-semibold tracking-wide text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors">
-            Cursos
+            Precios
           </span>
           <motion.svg
             className="w-5 h-5 text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors"

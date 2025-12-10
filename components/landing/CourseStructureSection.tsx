@@ -61,7 +61,7 @@ export default function CourseStructureSection() {
           {sections.map((section) => (
             <div
               key={section.id}
-              className="relative bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden group"
+              className="relative bg-white rounded-2xl p-8 border border-gray-100 hover:border-gray-200 transition-all duration-300 overflow-hidden group"
             >
               <Image
                 src={section.image}

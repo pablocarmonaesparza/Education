@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const courseTypes = [
@@ -21,82 +22,214 @@ const courseTypes = [
   { id: 16, title: "Innovación Continua", topics: ["Productos", "APIs", "Transformación"], icon: "💡" },
 ];
 
-export default function AvailableCoursesSection() {
+// Split courses into 3 rows
+const row1Courses = courseTypes.slice(0, 6);
+const row2Courses = courseTypes.slice(6, 11);
+const row3Courses = courseTypes.slice(11, 16);
+
+// Duplicate for infinite scroll effect (4x for smoother loop)
+const duplicatedRow1 = [...row1Courses, ...row1Courses, ...row1Courses, ...row1Courses];
+const duplicatedRow2 = [...row2Courses, ...row2Courses, ...row2Courses, ...row2Courses];
+const duplicatedRow3 = [...row3Courses, ...row3Courses, ...row3Courses, ...row3Courses];
+
+interface CarouselRowProps {
+  courses: typeof courseTypes;
+  direction: "left" | "right";
+  duration: number;
+}
+
+function CarouselRow({ courses, direction, duration }: CarouselRowProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);
+  const animationRef = useRef<number>();
+  const lastTimeRef = useRef<number>(0);
+  const [, forceUpdate] = useState(0);
+
+  // Calculate dimensions
+  const cardWidth = 256; // 240px + 16px gap
+  const singleSetWidth = cardWidth * (courses.length / 4); // Divide by 4 since we quadrupled
+
+  useEffect(() => {
+    const speed = singleSetWidth / duration; // pixels per second
+
+    const animate = (timestamp: number) => {
+      if (!lastTimeRef.current) {
+        lastTimeRef.current = timestamp;
+      }
+
+      const deltaTime = (timestamp - lastTimeRef.current) / 1000;
+      lastTimeRef.current = timestamp;
+
+      // Always move in the same direction (positive)
+      offsetRef.current = offsetRef.current + speed * deltaTime;
+
+      // Reset seamlessly when we've scrolled one full set
+      if (offsetRef.current >= singleSetWidth) {
+        offsetRef.current = offsetRef.current - singleSetWidth;
+      }
+
+      forceUpdate(n => n + 1);
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [duration, singleSetWidth]);
+
+  // For right direction, we reverse the visual offset
+  const visualOffset = direction === "left" ? offsetRef.current : singleSetWidth - offsetRef.current;
+
   return (
-    <section id="available-courses" className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+    <div
+      ref={containerRef}
+      className="flex gap-4 md:gap-6"
+      style={{
+        width: "fit-content",
+        transform: `translateX(${-visualOffset}px)`,
+      }}
+    >
+      {courses.map((course, index) => (
+        <div
+          key={`${course.id}-${index}`}
+          className="flex-shrink-0 w-[200px] md:w-[240px] lg:w-[280px] bg-white dark:bg-gray-800 rounded-xl p-4 md:p-5 border-2 border-gray-100 dark:border-gray-700"
+        >
+          {/* Icon */}
+          <div className="text-3xl md:text-4xl mb-3">
+            {course.icon}
+          </div>
+
+          {/* Title */}
+          <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+            {course.title}
+          </h3>
+
+          {/* Topics */}
+          <div className="flex flex-wrap gap-1.5">
+            {course.topics.map((topic, i) => (
+              <span
+                key={i}
+                className="px-2 py-0.5 bg-[#1472FF]/10 dark:bg-[#1472FF]/20 text-[#1472FF] dark:text-[#5BA0FF] text-xs font-medium rounded-full"
+              >
+                {topic}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function AvailableCoursesSection() {
+  // Same duration for all rows (75% speed)
+  const baseDuration = 60;
+
+  return (
+    <section id="available-courses" className="relative min-h-screen flex flex-col justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-950 overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#1472FF]/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
         <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 pt-32 md:pt-40">
+      <div className="relative z-10 py-20 pt-32 md:pt-40">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           viewport={{ once: true }}
-          className="text-center mb-12 md:mb-16"
+          className="container mx-auto px-4 sm:px-6 lg:px-8 mb-12 md:mb-16"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
-            Posibilidades Infinitas
-          </h2>
-          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto font-light">
-            Con nuestros más de 1,000 videos, generamos cursos personalizados para cualquier proyecto de IA y automatización.
-          </p>
+          <div className="text-center">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6 leading-tight">
+              Posibilidades Infinitas
+            </h2>
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+              Con nuestros más de 1,000 videos, generamos cursos personalizados para cualquier proyecto de IA y automatización.
+            </p>
+          </div>
         </motion.div>
 
-        {/* Course Types Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {courseTypes.map((course, index) => (
-            <motion.div
-              key={course.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.05 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-xl p-4 md:p-5 shadow-md border-2 border-gray-100 hover:border-[#1472FF]/20 hover:shadow-lg transition-all duration-300 group"
-            >
-              {/* Icon */}
-              <div className="text-3xl md:text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
-                {course.icon}
-              </div>
-
-              {/* Title */}
-              <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 leading-tight">
-                {course.title}
-              </h3>
-
-              {/* Topics */}
-              <div className="flex flex-wrap gap-1.5">
-                {course.topics.map((topic, i) => (
-                  <span
-                    key={i}
-                    className="px-2 py-0.5 bg-[#1472FF]/10 text-[#1472FF] text-xs font-medium rounded-full"
-                  >
-                    {topic}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* CTA */}
+        {/* Auto-scrolling Carousels - 3 rows */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="text-center mt-12 md:mt-16"
+          className="flex flex-col gap-4 md:gap-6"
         >
-          <p className="text-base md:text-lg text-gray-700 font-light">
-            ¿Tienes otra idea? Describe tu proyecto y crearemos un curso 100% personalizado para ti.
-          </p>
+          {/* Row 1 - Left direction */}
+          <div className="overflow-x-clip">
+            <CarouselRow
+              courses={duplicatedRow1}
+              direction="left"
+              duration={baseDuration}
+            />
+          </div>
+
+          {/* Row 2 - Right direction (opposite), same speed */}
+          <div className="overflow-x-clip">
+            <CarouselRow
+              courses={duplicatedRow2}
+              direction="right"
+              duration={baseDuration}
+            />
+          </div>
+
+          {/* Row 3 - Left direction, same speed */}
+          <div className="overflow-x-clip">
+            <CarouselRow
+              courses={duplicatedRow3}
+              direction="left"
+              duration={baseDuration}
+            />
+          </div>
         </motion.div>
       </div>
+
+      {/* Next section indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.6 }}
+        viewport={{ once: true }}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+      >
+        <button
+          onClick={() => {
+            const element = document.getElementById("about");
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+          className="flex flex-col items-center gap-1 cursor-pointer group"
+        >
+          <span className="text-sm font-semibold tracking-wide text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors">
+            Acerca De
+          </span>
+          <motion.svg
+            className="w-5 h-5 text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </motion.svg>
+        </button>
+      </motion.div>
     </section>
   );
 }
-

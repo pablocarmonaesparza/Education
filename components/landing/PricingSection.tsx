@@ -111,7 +111,7 @@ export default function PricingSection() {
   ];
 
   return (
-    <section id="pricing" className="relative bg-gradient-to-b from-gray-50 to-white min-h-screen flex items-center justify-center py-20 pt-24 md:pt-28 overflow-hidden">
+    <section id="pricing" className="relative bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950 min-h-screen flex items-center justify-center py-20 pt-24 md:pt-28 overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -right-32 w-96 h-96 bg-[#1472FF]/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
@@ -125,10 +125,10 @@ export default function PricingSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center text-gray-900 mb-4 leading-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-900 dark:text-white mb-4 leading-tight">
             Invierte En Ti
           </h2>
-          <p className="text-xl md:text-2xl text-center text-gray-600 mb-16 max-w-3xl mx-auto font-light">
+          <p className="text-lg md:text-xl text-center text-gray-600 dark:text-gray-400 mb-16 max-w-3xl mx-auto font-light">
             Construye tu proyecto en semanas, no meses.
             <br />
             <span className="text-[#1472FF] font-semibold">Garantía de devolución de 30 días si no estás satisfecho.</span>
@@ -142,15 +142,15 @@ export default function PricingSection() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex justify-center mb-12"
         >
-          <div className="bg-white rounded-full p-1 flex space-x-1 shadow-lg border border-gray-200">
+          <div className="bg-white dark:bg-gray-800 rounded-full p-1 flex space-x-1 border border-gray-200 dark:border-gray-700">
             {(["USD", "MXN", "ARS", "COP"] as Currency[]).map((currency) => (
               <button
                 key={currency}
                 onClick={() => setSelectedCurrency(currency)}
                 className={`px-6 py-2 rounded-full font-semibold transition-all ${
                   selectedCurrency === currency
-                    ? "bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white shadow-md"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? "bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
                 {currency}
@@ -169,14 +169,14 @@ export default function PricingSection() {
               transition={{ duration: 0.6, delay: 0.1 * (index + 3) }}
               className={`relative rounded-2xl p-5 md:p-6 transition-all duration-300 flex flex-col ${
                 tier.popular
-                  ? "bg-gradient-to-br from-[#1472FF]/10 to-[#5BA0FF]/10 border-2 border-[#1472FF] shadow-xl"
-                  : "bg-white shadow-md hover:shadow-lg border border-gray-200"
+                  ? "bg-gradient-to-br from-[#1472FF]/10 to-[#5BA0FF]/10 dark:from-[#1472FF]/20 dark:to-[#5BA0FF]/20 border-2 border-[#1472FF]"
+                  : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
               }`}
             >
               {/* Popular Badge */}
               {tier.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white px-4 py-1 rounded-full text-xs font-bold shadow-md">
+                  <div className="bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white px-4 py-1 rounded-full text-xs font-bold">
                     🔥 MÁS POPULAR
                   </div>
                 </div>
@@ -184,10 +184,10 @@ export default function PricingSection() {
 
               {/* Title */}
               <div className="mb-2">
-                <h3 className="text-lg md:text-xl font-bold text-gray-900">{tier.name}</h3>
+                <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{tier.name}</h3>
               </div>
 
-              <p className="text-gray-600 text-xs mb-3">{tier.description}</p>
+              <p className="text-gray-600 dark:text-gray-400 text-xs mb-3">{tier.description}</p>
 
               {/* Pricing */}
               <div className="mb-3">
@@ -203,9 +203,9 @@ export default function PricingSection() {
                   <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] bg-clip-text text-transparent">
                     {formatPrice(tier.price)}
                   </span>
-                  <span className="text-gray-500 text-xs md:text-sm">{selectedCurrency}</span>
+                  <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{selectedCurrency}</span>
                 </div>
-                <p className="text-xs md:text-sm text-gray-500 mt-1">Pago único • Acceso de por vida</p>
+                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">Pago único • Acceso de por vida</p>
               </div>
 
               {/* Features */}
@@ -225,7 +225,7 @@ export default function PricingSection() {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    <span className="text-xs md:text-sm text-gray-700 leading-snug">{feature}</span>
+                    <span className="text-xs md:text-sm text-gray-700 dark:text-gray-300 leading-snug">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -235,8 +235,8 @@ export default function PricingSection() {
                 onClick={() => handleStripeCheckout(tier.stripePriceId)}
                 className={`w-full py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 mt-auto ${
                   tier.popular
-                    ? "bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white shadow-md hover:shadow-lg"
-                    : "bg-white text-[#1472FF] border-2 border-[#1472FF] hover:bg-[#1472FF]/10"
+                    ? "bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white"
+                    : "bg-white dark:bg-gray-800 text-[#1472FF] border-2 border-[#1472FF] hover:bg-[#1472FF]/10 dark:hover:bg-[#1472FF]/20"
                 }`}
               >
                 {tier.cta} →
@@ -247,6 +247,44 @@ export default function PricingSection() {
         </div>
 
       </div>
+
+      {/* Next section indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.6 }}
+        viewport={{ once: true }}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+      >
+        <button
+          onClick={() => {
+            const element = document.getElementById("faq");
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+          className="flex flex-col items-center gap-1 cursor-pointer group"
+        >
+          <span className="text-sm font-semibold tracking-wide text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors">
+            FAQ
+          </span>
+          <motion.svg
+            className="w-5 h-5 text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </motion.svg>
+        </button>
+      </motion.div>
     </section>
   );
 }

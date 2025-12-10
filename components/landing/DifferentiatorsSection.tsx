@@ -80,7 +80,7 @@ export default function DifferentiatorsSection() {
           {differentiators.map((item, index) => (
             <div
               key={index}
-              className="group relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-transparent"
+              className="group relative bg-white p-8 rounded-2xl transition-all duration-300 border border-gray-100 hover:border-transparent"
             >
               {/* Gradient background on hover */}
               <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`}></div>

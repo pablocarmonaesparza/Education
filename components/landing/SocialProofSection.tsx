@@ -112,7 +112,7 @@ export default function SocialProofSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1, ease: "easeOut" }}
               viewport={{ once: true }}
-              className="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300"
+              className="bg-white p-8 md:p-10 rounded-2xl border border-gray-100 hover:border-gray-200 transition-all duration-300"
             >
               {/* Rating */}
               <div className="flex gap-1 mb-4">
