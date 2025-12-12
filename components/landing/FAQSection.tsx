@@ -101,19 +101,19 @@ export default function FAQSection() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-center md:text-left mb-4 md:mb-0">
               <p className="text-gray-600 dark:text-gray-400">
-                &copy; {currentYear} Leap. Todos los derechos reservados.
+                &copy; {currentYear} Itera. Todos los derechos reservados.
               </p>
             </div>
             <div className="flex gap-6">
               <Link
                 href="/terms"
-                className="text-gray-600 dark:text-gray-400 hover:text-brand-dark dark:hover:text-[#5BA0FF] transition-colors"
+                className="text-gray-600 dark:text-gray-400 hover:text-[#1472FF] dark:hover:text-[#5BA0FF] transition-colors"
               >
                 Términos
               </Link>
               <Link
                 href="/privacy"
-                className="text-gray-600 dark:text-gray-400 hover:text-brand-dark dark:hover:text-[#5BA0FF] transition-colors"
+                className="text-gray-600 dark:text-gray-400 hover:text-[#1472FF] dark:hover:text-[#5BA0FF] transition-colors"
               >
                 Privacidad
               </Link>

@@ -1,12 +1,33 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function AuthNavbar() {
   const pathname = usePathname();
   const router = useRouter();
   const isSignupPage = pathname === '/auth/signup';
+  const [isDark, setIsDark] = useState(false);
+
+  // Detect dark mode
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    
+    checkDarkMode();
+    
+    // Watch for changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent">
@@ -14,11 +35,25 @@ export default function AuthNavbar() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="text-2xl font-bold">
-              <span className="text-[#111827] dark:text-white">
-                Leap
-              </span>
-            </div>
+            {isDark ? (
+              <Image
+                src="/images/logo-light.png"
+                alt="Itera"
+                width={120}
+                height={40}
+                className="h-8 w-auto"
+                priority
+              />
+            ) : (
+              <Image
+                src="/images/logo-dark.png"
+                alt="Itera"
+                width={120}
+                height={40}
+                className="h-8 w-auto"
+                priority
+              />
+            )}
           </Link>
 
           {/* Auth Button - Show opposite page */}

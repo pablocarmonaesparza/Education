@@ -136,7 +136,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
         if (error) throw error;
 
-        setMessage('¡Cuenta creada! Revisa tu email para confirmar tu cuenta.');
+        setMessage('Cuenta creada. Revisa tu email para confirmar tu cuenta.');
         // Limpiar el formulario
         setEmail('');
         setPassword('');
@@ -149,10 +149,17 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
         if (error) throw error;
 
-        // Redirect to dashboard
-        setMessage('¡Inicio de sesión exitoso! Redirigiendo...');
+        // Check if there's a pending project idea from the landing page
+        const pendingIdea = typeof window !== 'undefined' ? sessionStorage.getItem('pendingProjectIdea') : null;
+        
+        setMessage('Inicio de sesión exitoso. Redirigiendo...');
         setTimeout(() => {
-          router.push('/dashboard');
+          if (pendingIdea) {
+            // Redirect to onboarding to create the course with the saved idea
+            router.push('/onboarding');
+          } else {
+            router.push('/dashboard');
+          }
           router.refresh();
         }, 1000);
       }
@@ -191,7 +198,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
               </svg>
               <div className="flex-1">
                 <p className="text-yellow-800 dark:text-yellow-300 text-sm font-semibold mb-2">
-                  ⚠️ Base de datos no configurada
+                  Base de datos no configurada
                 </p>
                 <p className="text-yellow-700 dark:text-yellow-400 text-sm mb-3">
                   Supabase aún no está configurado. Puedes explorar la plataforma en modo demo.
@@ -200,7 +207,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                   href="/demo"
                   className="inline-block bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-700 dark:hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
                 >
-                  🎯 Ver Demo del Dashboard
+                  Ver Demo del Dashboard
                 </Link>
               </div>
             </div>

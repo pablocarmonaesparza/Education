@@ -1,7 +1,6 @@
 import NewHeroSection from "@/components/landing/NewHeroSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
 import AvailableCoursesSection from "@/components/landing/AvailableCoursesSection";
-import AboutSection from "@/components/landing/AboutSection";
 import PricingSection from "@/components/landing/PricingSection";
 import FAQSection from "@/components/landing/FAQSection";
 import Navbar from "@/components/shared/Navbar";
@@ -15,7 +14,6 @@ export default function Home() {
       <NewHeroSection />
       <HowItWorksSection />
       <AvailableCoursesSection />
-      <AboutSection />
       <PricingSection />
       <FAQSection />
     </main>

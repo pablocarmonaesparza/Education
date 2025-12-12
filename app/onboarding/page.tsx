@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -11,6 +11,33 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  // Load saved idea from sessionStorage or cookie on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // First try sessionStorage (for email/password login)
+      let savedIdea = sessionStorage.getItem('pendingProjectIdea');
+      
+      // If not in sessionStorage, try cookie (for OAuth login)
+      if (!savedIdea) {
+        const cookies = document.cookie.split(';');
+        for (const cookie of cookies) {
+          const [name, value] = cookie.trim().split('=');
+          if (name === 'pendingProjectIdea' && value) {
+            savedIdea = decodeURIComponent(value);
+            break;
+          }
+        }
+      }
+      
+      if (savedIdea) {
+        setProjectIdea(savedIdea);
+        // Clear both storage locations
+        sessionStorage.removeItem('pendingProjectIdea');
+        document.cookie = 'pendingProjectIdea=; path=/; max-age=0';
+      }
+    }
+  }, []);
 
   const handleCreateCourse = async () => {
     if (!projectIdea.trim() || projectIdea.trim().length < 200) {

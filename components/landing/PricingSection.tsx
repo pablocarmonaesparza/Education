@@ -12,12 +12,12 @@ export default function PricingSection() {
 
   const exchangeRates = {
     USD: 1,
-    MXN: 17,
-    ARS: 350,
-    COP: 4000,
+    MXN: 20,
+    ARS: 1000,
+    COP: 4200,
   };
 
-  const formatPrice = (usdPrice: number) => {
+  const formatPrice = (usdPrice: number, isMonthly: boolean = false) => {
     const price = Math.round(usdPrice * exchangeRates[selectedCurrency]);
     const symbols = {
       USD: "$",
@@ -25,121 +25,95 @@ export default function PricingSection() {
       ARS: "$",
       COP: "$",
     };
-    return `${symbols[selectedCurrency]}${price.toLocaleString()}`;
+    
+    if (usdPrice === 0) {
+      return "Gratis";
+    }
+    
+    return `${symbols[selectedCurrency]}${price.toLocaleString()}${isMonthly ? "/mes" : ""}`;
   };
 
-  const handleStripeCheckout = async (priceId: string) => {
-    try {
-      const response = await fetch("/api/stripe/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ priceId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || "Failed to create checkout session"
-        );
-      }
-
-      const { sessionUrl } = await response.json();
-      router.push(sessionUrl);
-    } catch (error) {
-      console.error("Error during Stripe checkout:", error);
-      alert(
-        "Hubo un problema al iniciar el proceso de pago con Stripe. Por favor, inténtalo de nuevo."
-      );
-    }
+  const handleSelectPlan = () => {
+    router.push("/auth/signup");
   };
 
   const tiers = [
     {
       id: "basic",
       name: "Básico",
-      price: 147,
-      originalPrice: 297,
+      price: 0,
+      isMonthly: false,
       popular: false,
       description: "Acceso completo para aprender a tu ritmo",
       features: [
-        "Acceso a los 400+ micro-videos",
-        "Biblioteca completa de 12 módulos",
-        "Aprendizaje auto-guiado",
-        "Actualizaciones de contenido",
-        "Acceso de por vida",
+        "Acceso completo a los 400+ micro-videos (1-3 min c/u)",
+        "Contenido organizado en 12 secciones",
+        "Acceso a la comunidad general en Slack",
+        "Casos de uso enfocados en LATAM",
+        "Actualizaciones de contenido incluidas",
       ],
-      cta: "Empezar Ahora",
-      stripePriceId: "price_12345_basic",
+      cta: "Comenzar Gratis",
     },
     {
-      id: "personalized",
-      name: "Personalizado con IA",
-      price: 247,
-      originalPrice: 497,
+      id: "plus",
+      name: "Plus",
+      price: 50,
+      isMonthly: true,
       popular: true,
       description: "La experiencia completa con IA personalizada",
       features: [
-        "✨ Todo lo del plan Básico",
-        "🤖 Ruta personalizada con Claude AI",
-        "🎯 Análisis de tu proyecto específico",
-        "📊 Checkpoints adaptativos",
-        "🏆 Sistema de badges y progreso",
-        "⚡ Actualizaciones prioritarias",
+        "Todo lo del plan Básico",
+        "Curso personalizado generado por AI según tu proyecto",
+        "De 400+ videos, la AI selecciona los 10-200 que necesitas",
+        "Acceso a la comunidad prioritaria en Discord",
+        "Asistente virtual de seguimiento (Limitado)",
       ],
-      cta: "Empieza Tu Ruta Personalizada",
-      stripePriceId: "price_12345_personalized",
+      cta: "Comenzar con Plus",
     },
     {
-      id: "premium",
-      name: "Premium",
-      price: 497,
-      originalPrice: 997,
-      description: "Experiencia completa + mentoría 1-on-1",
+      id: "pro",
+      name: "Pro",
+      price: 249,
+      isMonthly: true,
+      popular: false,
+      description: "Experiencia premium con tutoría personalizada",
       features: [
-        "Todo lo del plan Personalizado",
-        "Mentoría grupal semanal en vivo",
-        "2 sesiones 1-on-1 de revisión",
-        "Comunidad privada Premium",
-        "Certificado verificado",
-        "Acceso anticipado a contenido nuevo",
+        "Todo lo del plan Plus",
+        "Tutoría quincenal con Pablo de forma individual",
+        "Hasta 5 cursos personalizados por mes",
+        "Contexto acumulativo entre sesiones",
+        "Asistente virtual de seguimiento (Ilimitado)",
       ],
-      cta: "Inversión Total",
-      stripePriceId: "price_12345_premium",
+      cta: "Comenzar con Pro",
     },
   ];
 
   return (
-    <section id="pricing" className="relative bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950 min-h-screen flex items-center justify-center py-20 pt-24 md:pt-28 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -right-32 w-96 h-96 bg-[#1472FF]/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
-        <div className="absolute bottom-1/4 -left-32 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
-      </div>
-
+    <section id="pricing" className="relative bg-white dark:bg-gray-950 min-h-screen flex items-center justify-center py-20 pt-24 md:pt-28 overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
+          viewport={{ once: true }}
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-900 dark:text-white mb-4 leading-tight">
-            Invierte En Ti
+            Nuestros Planes
           </h2>
           <p className="text-lg md:text-xl text-center text-gray-600 dark:text-gray-400 mb-16 max-w-3xl mx-auto font-light">
-            Construye tu proyecto en semanas, no meses.
+            Elige el plan que mejor se adapte a tus necesidades.
             <br />
-            <span className="text-[#1472FF] font-semibold">Garantía de devolución de 30 días si no estás satisfecho.</span>
+            <span className="text-[#1472FF] font-semibold">Comienza gratis y escala cuando estés listo.</span>
           </p>
         </motion.div>
 
         {/* Currency Selector */}
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
+          viewport={{ once: true }}
           className="flex justify-center mb-12"
         >
           <div className="bg-white dark:bg-gray-800 rounded-full p-1 flex space-x-1 border border-gray-200 dark:border-gray-700">
@@ -165,8 +139,9 @@ export default function PricingSection() {
             <motion.div
               key={tier.id}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 * (index + 3) }}
+              viewport={{ once: true }}
               className={`relative rounded-2xl p-5 md:p-6 transition-all duration-300 flex flex-col ${
                 tier.popular
                   ? "bg-gradient-to-br from-[#1472FF]/10 to-[#5BA0FF]/10 dark:from-[#1472FF]/20 dark:to-[#5BA0FF]/20 border-2 border-[#1472FF]"
@@ -187,31 +162,27 @@ export default function PricingSection() {
                 <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{tier.name}</h3>
               </div>
 
-              <p className="text-gray-600 dark:text-gray-400 text-xs mb-3">{tier.description}</p>
+              <p className="text-gray-600 dark:text-gray-400 text-xs mb-4">{tier.description}</p>
 
               {/* Pricing */}
-              <div className="mb-3">
-                <div className="flex items-end gap-2 mb-1">
-                  <span className="text-gray-400 line-through text-lg">
-                    {formatPrice(tier.originalPrice)}
-                  </span>
-                  <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">
-                    50% OFF
-                  </span>
-                </div>
+              <div className="mb-4">
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] bg-clip-text text-transparent">
-                    {formatPrice(tier.price)}
+                    {formatPrice(tier.price, tier.isMonthly)}
                   </span>
-                  <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{selectedCurrency}</span>
+                  {tier.price > 0 && (
+                    <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{selectedCurrency}</span>
+                  )}
                 </div>
-                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">Pago único • Acceso de por vida</p>
+                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {tier.price === 0 ? "Sin tarjeta de crédito" : "Cancela cuando quieras"}
+                </p>
               </div>
 
               {/* Features */}
-              <ul className="space-y-1.5 mb-3 flex-1 max-h-[200px] overflow-y-auto pr-1">
+              <ul className="space-y-2 mb-4 flex-1">
                 {tier.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5">
+                  <li key={idx} className="flex items-start gap-2">
                     <svg
                       className="w-4 h-4 flex-shrink-0 text-green-500 mt-0.5"
                       fill="none"
@@ -232,10 +203,10 @@ export default function PricingSection() {
 
               {/* CTA Button */}
               <button
-                onClick={() => handleStripeCheckout(tier.stripePriceId)}
+                onClick={handleSelectPlan}
                 className={`w-full py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 mt-auto ${
                   tier.popular
-                    ? "bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white"
+                    ? "bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white hover:opacity-90"
                     : "bg-white dark:bg-gray-800 text-[#1472FF] border-2 border-[#1472FF] hover:bg-[#1472FF]/10 dark:hover:bg-[#1472FF]/20"
                 }`}
               >

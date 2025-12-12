@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -22,10 +23,20 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/auth/login?error=confirmation_failed`)
     }
 
+    // Check if there's a pending project idea from the landing page
+    const cookieStore = await cookies()
+    const pendingIdeaCookie = cookieStore.get('pendingProjectIdea')
+    const hasPendingIdea = !!pendingIdeaCookie?.value
+
     // Get user to check if they have a personalized path
     const { data: { user } } = await supabase.auth.getUser()
     
     if (user) {
+      // If there's a pending idea, always redirect to onboarding to create the course
+      if (hasPendingIdea) {
+        return NextResponse.redirect(`${origin}/onboarding`)
+      }
+
       // Check if user has a personalized path
       const { data: intakeData } = await supabase
         .from('intake_responses')

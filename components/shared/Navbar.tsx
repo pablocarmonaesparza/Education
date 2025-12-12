@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
@@ -10,13 +11,31 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [isDark, setIsDark] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  // Detect dark mode
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    
+    checkDarkMode();
+    
+    // Watch for changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   const navLinks = [
     { href: "#how-it-works", label: "Cómo Funciona", id: "how-it-works" },
     { href: "#available-courses", label: "Cursos", id: "available-courses" },
-    { href: "#about", label: "Acerca De", id: "about" },
     { href: "#pricing", label: "Precios", id: "pricing" },
     { href: "#faq", label: "FAQ", id: "faq" },
   ];
@@ -101,15 +120,30 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-20 relative">
           {/* Logo */}
-          <Link href="/" className="group flex items-center gap-2">
+          <Link href="/" className="group flex items-center">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="text-2xl font-bold"
             >
-              <span className="text-[#1472FF] transition-colors duration-300">
-                Leap
-              </span>
+              {isDark ? (
+                <Image
+                  src="/images/logo-light.png"
+                  alt="Itera"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto"
+                  priority
+                />
+              ) : (
+                <Image
+                  src="/images/logo-dark.png"
+                  alt="Itera"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto"
+                  priority
+                />
+              )}
             </motion.div>
           </Link>
 

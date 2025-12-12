@@ -3,7 +3,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Footer from '@/components/shared/Footer';
 import AuthNavbar from '@/components/auth/AuthNavbar';
 import { createClient } from '@/lib/supabase/client';
 
@@ -267,7 +266,6 @@ export default function LoginPage() {
           </div>
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

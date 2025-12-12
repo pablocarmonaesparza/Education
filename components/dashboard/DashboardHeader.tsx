@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
@@ -11,8 +12,27 @@ export default function DashboardHeader() {
   const [userProfile, setUserProfile] = useState<{ name: string | null; email: string } | null>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  // Detect dark mode
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    
+    checkDarkMode();
+    
+    // Watch for changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -64,12 +84,28 @@ export default function DashboardHeader() {
   const userDisplayName = userProfile?.name || userProfile?.email?.split('@')[0] || 'Usuario';
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-30 flex items-center justify-between px-6">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-30 flex items-center justify-between px-6">
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2">
-        <div className="text-xl font-bold bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] bg-clip-text text-transparent">
-          Leap
-        </div>
+        {isDark ? (
+          <Image
+            src="/images/logo-light.png"
+            alt="Itera"
+            width={120}
+            height={40}
+            className="h-8 w-auto"
+            priority
+          />
+        ) : (
+          <Image
+            src="/images/logo-dark.png"
+            alt="Itera"
+            width={120}
+            height={40}
+            className="h-8 w-auto"
+            priority
+          />
+        )}
       </Link>
 
       {/* Right side - Settings and Profile */}
@@ -77,7 +113,7 @@ export default function DashboardHeader() {
         {/* Settings Button */}
         <button
           onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-          className="relative p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          className="relative p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           aria-label="Configuración"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,13 +128,13 @@ export default function DashboardHeader() {
                 className="fixed inset-0 z-10" 
                 onClick={() => setShowSettingsMenu(false)}
               />
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20">
                 <button
                   onClick={() => {
                     setShowSettingsMenu(false);
                     // TODO: Navigate to settings page
                   }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Configuración
                 </button>
@@ -107,7 +143,7 @@ export default function DashboardHeader() {
                     setShowSettingsMenu(false);
                     // TODO: Navigate to preferences page
                   }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Preferencias
                 </button>
@@ -120,7 +156,7 @@ export default function DashboardHeader() {
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Perfil"
           >
             {user?.user_metadata?.avatar_url ? (
@@ -143,17 +179,17 @@ export default function DashboardHeader() {
                 className="fixed inset-0 z-10" 
                 onClick={() => setShowProfileMenu(false)}
               />
-              <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
-                <div className="px-4 py-3 border-b border-gray-200">
-                  <p className="text-sm font-semibold text-gray-900">{userDisplayName}</p>
-                  <p className="text-xs text-gray-500 truncate">{userProfile?.email}</p>
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20">
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{userDisplayName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{userProfile?.email}</p>
                 </div>
                 <button
                   onClick={() => {
                     setShowProfileMenu(false);
                     // TODO: Navigate to profile page
                   }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Ver Perfil
                 </button>
@@ -162,7 +198,7 @@ export default function DashboardHeader() {
                     setShowProfileMenu(false);
                     handleLogout();
                   }}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Cerrar Sesión
                 </button>

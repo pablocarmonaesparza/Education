@@ -22,15 +22,13 @@ const courseTypes = [
   { id: 16, title: "Innovación Continua", topics: ["Productos", "APIs", "Transformación"], icon: "💡" },
 ];
 
-// Split courses into 3 rows
+// Split courses into 2 rows
 const row1Courses = courseTypes.slice(0, 6);
 const row2Courses = courseTypes.slice(6, 11);
-const row3Courses = courseTypes.slice(11, 16);
 
 // Duplicate for infinite scroll effect (4x for smoother loop)
 const duplicatedRow1 = [...row1Courses, ...row1Courses, ...row1Courses, ...row1Courses];
 const duplicatedRow2 = [...row2Courses, ...row2Courses, ...row2Courses, ...row2Courses];
-const duplicatedRow3 = [...row3Courses, ...row3Courses, ...row3Courses, ...row3Courses];
 
 interface CarouselRowProps {
   courses: typeof courseTypes;
@@ -44,12 +42,68 @@ function CarouselRow({ courses, direction, duration }: CarouselRowProps) {
   const animationRef = useRef<number>();
   const lastTimeRef = useRef<number>(0);
   const [, forceUpdate] = useState(0);
+  const [singleSetWidth, setSingleSetWidth] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Calculate dimensions
-  const cardWidth = 256; // 240px + 16px gap
-  const singleSetWidth = cardWidth * (courses.length / 4); // Divide by 4 since we quadrupled
+  // Calculate dimensions - get original set size (divide by 4 since we quadrupled)
+  const originalSetSize = courses.length / 4;
+
+  // Measure actual card width dynamically
+  useEffect(() => {
+    const measureWidth = () => {
+      if (containerRef.current && containerRef.current.children.length > 0) {
+        // Measure the actual width of one complete set by measuring multiple cards
+        const cards = Array.from(containerRef.current.children) as HTMLElement[];
+        if (cards.length >= originalSetSize) {
+          // Measure from first card to the end of the first set
+          const firstCard = cards[0];
+          const lastCardOfSet = cards[originalSetSize - 1];
+          const firstCardLeft = firstCard.offsetLeft;
+          const lastCardRight = lastCardOfSet.offsetLeft + lastCardOfSet.offsetWidth;
+          const gap = window.innerWidth >= 768 ? 24 : 16;
+          const calculatedWidth = lastCardRight - firstCardLeft + gap;
+          setSingleSetWidth(calculatedWidth);
+        } else {
+          // Fallback: calculate based on card width and gap
+          const firstCard = cards[0];
+          const cardWidth = firstCard.offsetWidth;
+          const gap = window.innerWidth >= 768 ? 24 : 16; // md:gap-6 = 24px, gap-4 = 16px
+          const cardWithGap = cardWidth + gap;
+          const calculatedWidth = cardWithGap * originalSetSize;
+          setSingleSetWidth(calculatedWidth);
+        }
+      }
+    };
+
+    // Measure on mount and resize
+    measureWidth();
+    window.addEventListener('resize', measureWidth);
+    
+    // Also measure after a short delay to ensure cards are rendered
+    const timeout = setTimeout(measureWidth, 100);
+    const timeout2 = setTimeout(measureWidth, 500); // Additional measurement for safety
+
+    return () => {
+      window.removeEventListener('resize', measureWidth);
+      clearTimeout(timeout);
+      clearTimeout(timeout2);
+    };
+  }, [originalSetSize, direction]);
+
+  // Initialize offset for right direction
+  useEffect(() => {
+    if (singleSetWidth > 0 && !isInitialized) {
+      // For right direction, start with negative offset so content can scroll right into view
+      if (direction === "right") {
+        offsetRef.current = singleSetWidth;
+      }
+      setIsInitialized(true);
+    }
+  }, [singleSetWidth, direction, isInitialized]);
 
   useEffect(() => {
+    if (singleSetWidth === 0 || !isInitialized) return; // Wait for width calculation and initialization
+
     const speed = singleSetWidth / duration; // pixels per second
 
     const animate = (timestamp: number) => {
@@ -60,12 +114,18 @@ function CarouselRow({ courses, direction, duration }: CarouselRowProps) {
       const deltaTime = (timestamp - lastTimeRef.current) / 1000;
       lastTimeRef.current = timestamp;
 
-      // Always move in the same direction (positive)
-      offsetRef.current = offsetRef.current + speed * deltaTime;
-
-      // Reset seamlessly when we've scrolled one full set
-      if (offsetRef.current >= singleSetWidth) {
-        offsetRef.current = offsetRef.current - singleSetWidth;
+      if (direction === "left") {
+        // For left direction: offset increases, translateX becomes more negative
+        offsetRef.current = offsetRef.current + speed * deltaTime;
+        if (offsetRef.current >= singleSetWidth) {
+          offsetRef.current = offsetRef.current - singleSetWidth;
+        }
+      } else {
+        // For right direction: offset decreases, translateX becomes less negative (moves right)
+        offsetRef.current = offsetRef.current - speed * deltaTime;
+        if (offsetRef.current <= 0) {
+          offsetRef.current = offsetRef.current + singleSetWidth;
+        }
       }
 
       forceUpdate(n => n + 1);
@@ -79,10 +139,10 @@ function CarouselRow({ courses, direction, duration }: CarouselRowProps) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [duration, singleSetWidth]);
+  }, [duration, singleSetWidth, direction, isInitialized]);
 
-  // For right direction, we reverse the visual offset
-  const visualOffset = direction === "left" ? offsetRef.current : singleSetWidth - offsetRef.current;
+  // Both directions use negative translateX, but right starts further back and moves toward 0
+  const normalizedOffset = singleSetWidth > 0 ? offsetRef.current : 0;
 
   return (
     <div
@@ -90,7 +150,8 @@ function CarouselRow({ courses, direction, duration }: CarouselRowProps) {
       className="flex gap-4 md:gap-6"
       style={{
         width: "fit-content",
-        transform: `translateX(${-visualOffset}px)`,
+        willChange: "transform",
+        transform: `translateX(${-normalizedOffset}px)`,
       }}
     >
       {courses.map((course, index) => (
@@ -130,13 +191,7 @@ export default function AvailableCoursesSection() {
   const baseDuration = 60;
 
   return (
-    <section id="available-courses" className="relative min-h-screen flex flex-col justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-950 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#1472FF]/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
-      </div>
-
+    <section id="available-courses" className="relative min-h-screen flex flex-col justify-center bg-white dark:bg-gray-950 overflow-hidden">
       <div className="relative z-10 py-20 pt-32 md:pt-40">
         {/* Header */}
         <motion.div
@@ -156,7 +211,7 @@ export default function AvailableCoursesSection() {
           </div>
         </motion.div>
 
-        {/* Auto-scrolling Carousels - 3 rows */}
+        {/* Auto-scrolling Carousels - 2 rows */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -165,7 +220,7 @@ export default function AvailableCoursesSection() {
           className="flex flex-col gap-4 md:gap-6"
         >
           {/* Row 1 - Left direction */}
-          <div className="overflow-x-clip">
+          <div className="overflow-x-hidden w-full">
             <CarouselRow
               courses={duplicatedRow1}
               direction="left"
@@ -174,19 +229,10 @@ export default function AvailableCoursesSection() {
           </div>
 
           {/* Row 2 - Right direction (opposite), same speed */}
-          <div className="overflow-x-clip">
+          <div className="overflow-x-hidden w-full">
             <CarouselRow
               courses={duplicatedRow2}
               direction="right"
-              duration={baseDuration}
-            />
-          </div>
-
-          {/* Row 3 - Left direction, same speed */}
-          <div className="overflow-x-clip">
-            <CarouselRow
-              courses={duplicatedRow3}
-              direction="left"
               duration={baseDuration}
             />
           </div>
@@ -203,7 +249,7 @@ export default function AvailableCoursesSection() {
       >
         <button
           onClick={() => {
-            const element = document.getElementById("about");
+            const element = document.getElementById("pricing");
             if (element) {
               element.scrollIntoView({ behavior: "smooth" });
             }
@@ -211,7 +257,7 @@ export default function AvailableCoursesSection() {
           className="flex flex-col items-center gap-1 cursor-pointer group"
         >
           <span className="text-sm font-semibold tracking-wide text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors">
-            Acerca De
+            Precios
           </span>
           <motion.svg
             className="w-5 h-5 text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors"
