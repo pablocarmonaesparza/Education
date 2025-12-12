@@ -1,200 +1,148 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import DashboardContent from '@/components/dashboard/DashboardContent';
+import { Suspense } from 'react';
+import { DashboardSkeleton } from '@/components/dashboard/DashboardShell';
+import ContinueLearningHero from '@/components/dashboard/ContinueLearningHero';
+import LearningPathSection from '@/components/dashboard/LearningPathSection';
+import StatsSection from '@/components/dashboard/StatsSection';
 
 export default async function DashboardPage() {
-  try {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+  // Auth check
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) {
+    redirect('/auth/login');
+  }
 
-    if (userError || !user) {
-      redirect('/auth/login');
-    }
+  // Fetch user profile
+  const { data: userProfile } = await supabase
+    .from('users')
+    .select('name, email, tier')
+    .eq('id', user.id)
+    .single();
 
-    // Get user profile data
-    const { data: userProfile } = await supabase
-      .from('users')
-      .select('name, email, tier')
-      .eq('id', user.id)
-      .maybeSingle();
+  // Fetch learning path (intake response with generated_path)
+  const { data: intakeResponse } = await supabase
+    .from('intake_responses')
+    .select('id, responses, generated_path, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
 
-    // Get video progress statistics
-    const { count: completedCount } = await supabase
-      .from('video_progress')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('completed', true);
+  // Redirect to onboarding if no learning path
+  if (!intakeResponse?.generated_path) {
+    redirect('/onboarding');
+  }
 
-    const { count: totalProgressCount } = await supabase
-      .from('video_progress')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+  // Fetch video progress
+  const { data: videoProgress } = await supabase
+    .from('video_progress')
+    .select('*')
+    .eq('user_id', user.id);
 
-    // Get full intake response with project details
-    const { data: intakeResponse } = await supabase
-      .from('intake_responses')
-      .select('id, responses, generated_path')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+  const generatedPath = intakeResponse.generated_path;
+  const phases = generatedPath?.phases || [];
+  const projectDescription = intakeResponse.responses?.project || '';
 
-    const hasPersonalizedPath = !!intakeResponse?.generated_path;
+  // Calculate progress
+  const progressMap = new Map();
+  (videoProgress || []).forEach((vp: any) => {
+    progressMap.set(vp.video_id, vp);
+  });
 
-    // Redirect to onboarding if user doesn't have a personalized path
-    if (!hasPersonalizedPath) {
-      redirect('/onboarding');
-    }
+  // Find current video (first incomplete)
+  let currentPhaseIndex = 0;
+  let currentVideoIndex = 0;
+  let totalVideos = 0;
+  let completedVideos = 0;
+  let foundCurrent = false;
 
-    const generatedPath = intakeResponse?.generated_path || null;
-    const userResponses = intakeResponse?.responses || {};
+  phases.forEach((phase: any, pIndex: number) => {
+    const videos = phase.videos || [];
+    videos.forEach((video: any, vIndex: number) => {
+      totalVideos++;
+      const progress = progressMap.get(String(video.order || vIndex + 1));
+      if (progress?.completed) {
+        completedVideos++;
+      } else if (!foundCurrent) {
+        currentPhaseIndex = pIndex;
+        currentVideoIndex = vIndex;
+        foundCurrent = true;
+      }
+    });
+  });
 
-    // Calculate total videos from generated path
-    const estimatedTotalVideos = generatedPath?.phases?.reduce(
-      (acc: number, phase: any) => acc + (phase?.videos?.length || 0),
-      0
-    ) || 0;
+  // If all completed, set to last video
+  if (!foundCurrent && phases.length > 0) {
+    const lastPhase = phases[phases.length - 1];
+    currentPhaseIndex = phases.length - 1;
+    currentVideoIndex = (lastPhase.videos?.length || 1) - 1;
+  }
 
-    const userName = userProfile?.name || userProfile?.email?.split('@')[0] || 'Usuario';
-    const completedVideos = completedCount || 0;
-    const totalVideos = estimatedTotalVideos || totalProgressCount || 0;
+  const currentPhase = phases[currentPhaseIndex];
+  const currentVideo = currentPhase?.videos?.[currentVideoIndex];
+  const overallProgress = totalVideos > 0 ? Math.round((completedVideos / totalVideos) * 100) : 0;
 
-    const overallProgress = totalVideos > 0 
-      ? Math.round((completedVideos / totalVideos) * 100) 
-      : 0;
+  // User name
+  const userName = userProfile?.name || userProfile?.email?.split('@')[0] || 'Usuario';
 
-    // Calculate phase progress
-    const totalPhases = generatedPath?.phases?.length || 0;
-    let phasesCompleted = 0;
-    let currentPhase = 1;
-    let currentVideo = 1;
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <div className="space-y-8">
+        {/* Welcome */}
+        <header>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            ¡Hola, {userName.split(' ')[0]}!
+          </h1>
+          <p className="text-gray-600 mt-1">
+            {overallProgress === 100 
+              ? '¡Felicidades! Has completado tu ruta de aprendizaje.'
+              : 'Continúa donde lo dejaste y avanza en tu proyecto.'}
+          </p>
+        </header>
 
-    if (generatedPath?.phases && Array.isArray(generatedPath.phases)) {
-      const { data: allVideoProgress } = await supabase
-        .from('video_progress')
-        .select('video_id, section_id, completed')
-        .eq('user_id', user.id);
+        {/* Hero: Continue Learning */}
+        <ContinueLearningHero
+          currentPhase={currentPhase}
+          currentPhaseIndex={currentPhaseIndex}
+          currentVideo={currentVideo}
+          currentVideoIndex={currentVideoIndex}
+          totalVideosInPhase={currentPhase?.videos?.length || 0}
+          overallProgress={overallProgress}
+          projectDescription={projectDescription}
+        />
 
-      generatedPath.phases.forEach((phase: any, phaseIndex: number) => {
-        const phaseVideos = phase?.videos || [];
-        if (phaseVideos.length === 0) return;
-        
-        const completedInPhase = phaseVideos.filter((video: any) => 
-          allVideoProgress?.some((vp: any) => 
-            vp.video_id === String(video.order) && vp.completed
-          )
-        ).length;
-        
-        if (completedInPhase === phaseVideos.length && phaseVideos.length > 0) {
-          phasesCompleted++;
-        }
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Learning Path - 2/3 */}
+          <div className="lg:col-span-2">
+            <LearningPathSection
+              phases={phases}
+              progressMap={progressMap}
+              currentPhaseIndex={currentPhaseIndex}
+            />
+          </div>
 
-        if (currentPhase === phaseIndex + 1 && completedInPhase < phaseVideos.length) {
-          currentVideo = completedInPhase + 1;
-        }
-      });
-    }
-
-    // Get checkpoint submissions
-    const { data: checkpointSubmissions = [] } = await supabase
-      .from('checkpoint_submissions')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('submitted_at', { ascending: false });
-
-    const checkpointResults = (checkpointSubmissions || []).map((cs: any) => ({
-      id: cs.id,
-      title: `Checkpoint ${cs.checkpoint_id}`,
-      validated: cs.validated || false,
-      feedback: cs.feedback || null,
-      submittedAt: cs.submitted_at || null,
-      validatedAt: cs.validated_at || null,
-    }));
-
-    // Calculate time spent
-    const timeSpent = completedVideos * 3;
-    const estimatedTime = totalVideos * 3;
-
-    // Extract project information
-    const userProject = generatedPath?.user_project || userResponses?.project || null;
-    const projectType = generatedPath?.project_type || userResponses?.project_type || null;
-    const skills = generatedPath?.skills_developed || userResponses?.skills || [];
-    const tools = generatedPath?.tools_learned || userResponses?.tools || [];
-
-    // Gamification data
-    const currentXP = completedVideos * 10 + phasesCompleted * 50;
-    const level = Math.floor(currentXP / 100) + 1;
-    const streak = 0;
-    const weeklyGoal = 10;
-    const weeklyProgress = 0;
-    const earnedBadges: string[] = [];
-    
-    if (completedVideos > 0) earnedBadges.push('first-video');
-    if (completedVideos >= 10) earnedBadges.push('videos-10');
-    if (phasesCompleted > 0) earnedBadges.push('first-phase');
-    if (streak >= 3) earnedBadges.push('streak-3');
-
-    // Artifacts
-    const artifacts = (checkpointSubmissions || []).map((cs: any) => ({
-      id: cs.id,
-      name: `Artefacto de ${cs.section_id || 'N/A'}`,
-      description: `Artefacto generado en el checkpoint ${cs.checkpoint_id || 'N/A'}`,
-      phase: 1,
-      phaseName: cs.section_id || 'N/A',
-      status: cs.validated ? 'validated' : cs.submission ? 'completed' : 'pending',
-      submittedAt: cs.submitted_at || null,
-      validatedAt: cs.validated_at || null,
-      fileUrl: cs.file_url || null,
-      feedback: cs.feedback || null,
-    }));
-
-    return (
-      <DashboardContent
-        userName={userName}
-        userEmail={user.email || ''}
-        completedVideos={completedVideos}
-        totalVideos={totalVideos}
-        overallProgress={overallProgress}
-        hasPersonalizedPath={hasPersonalizedPath}
-        userProject={userProject}
-        projectType={projectType}
-        skills={skills}
-        tools={tools}
-        learningPath={generatedPath}
-        userTier={(userProfile?.tier as 'basic' | 'personalized' | 'premium') || 'basic'}
-        phasesCompleted={phasesCompleted}
-        totalPhases={totalPhases}
-        currentPhase={currentPhase}
-        currentVideo={currentVideo}
-        timeSpent={timeSpent}
-        estimatedTime={estimatedTime}
-        artifacts={artifacts}
-        checkpointResults={checkpointResults}
-        weeklyGoal={weeklyGoal}
-        weeklyProgress={weeklyProgress}
-        streak={streak}
-        currentXP={currentXP}
-        level={level}
-        earnedBadges={earnedBadges}
-      />
-    );
-  } catch (error) {
-    console.error('Dashboard error:', error);
-    // Return a simple error page instead of crashing
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Error al cargar el dashboard</h1>
-          <p className="text-gray-600 mb-4">Por favor intenta recargar la página</p>
-          <a 
-            href="/dashboard" 
-            className="px-4 py-2 bg-[#1472FF] text-white rounded-lg hover:bg-[#0E5FCC]"
-          >
-            Recargar
-          </a>
+          {/* Stats - 1/3 */}
+          <div>
+            <StatsSection
+              completedVideos={completedVideos}
+              totalVideos={totalVideos}
+              totalPhases={phases.length}
+              completedPhases={phases.filter((p: any, i: number) => {
+                const videos = p.videos || [];
+                return videos.every((v: any, vi: number) => 
+                  progressMap.get(String(v.order || vi + 1))?.completed
+                );
+              }).length}
+              overallProgress={overallProgress}
+            />
+          </div>
         </div>
       </div>
-    );
-  }
+    </Suspense>
+  );
 }
