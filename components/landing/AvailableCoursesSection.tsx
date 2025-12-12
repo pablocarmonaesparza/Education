@@ -116,9 +116,9 @@ function CarouselRow({ courses, direction, duration }: CarouselRowProps) {
 
       if (direction === "left") {
         // For left direction: offset increases, translateX becomes more negative
-        offsetRef.current = offsetRef.current + speed * deltaTime;
-        if (offsetRef.current >= singleSetWidth) {
-          offsetRef.current = offsetRef.current - singleSetWidth;
+      offsetRef.current = offsetRef.current + speed * deltaTime;
+      if (offsetRef.current >= singleSetWidth) {
+        offsetRef.current = offsetRef.current - singleSetWidth;
         }
       } else {
         // For right direction: offset decreases, translateX becomes less negative (moves right)

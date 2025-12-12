@@ -171,7 +171,7 @@ export default function PricingSection() {
                     {formatPrice(tier.price, tier.isMonthly)}
                   </span>
                   {tier.price > 0 && (
-                    <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{selectedCurrency}</span>
+                  <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{selectedCurrency}</span>
                   )}
                 </div>
                 <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">

@@ -158,7 +158,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             // Redirect to onboarding to create the course with the saved idea
             router.push('/onboarding');
           } else {
-            router.push('/dashboard');
+          router.push('/dashboard');
           }
           router.refresh();
         }, 1000);

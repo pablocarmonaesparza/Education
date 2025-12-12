@@ -178,3 +178,4 @@ export type DashboardState =
   | 'ready' // Has learning path, ready to learn
   | 'completed' // Completed all content
   | 'error';
+

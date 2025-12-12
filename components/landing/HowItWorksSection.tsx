@@ -40,9 +40,9 @@ export default function HowItWorksSection() {
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-              setActiveIndex(index);
-            }
-          });
+        setActiveIndex(index);
+      }
+    });
         },
         { threshold: 0.5 }
       );
@@ -56,29 +56,29 @@ export default function HowItWorksSection() {
 
   return (
     <div 
-      id="how-it-works"
+      id="how-it-works" 
       className="relative bg-white dark:bg-gray-950"
       style={{ height: `${steps.length * 100}vh` }}
     >
       {/* Contenido visual sticky */}
       <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-24">
-          {/* Section Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            viewport={{ once: true }}
-            className="text-center mb-16 md:mb-20"
-          >
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
-              Cómo Funciona
-            </h2>
-          </motion.div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-24">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true }}
+          className="text-center mb-16 md:mb-20"
+        >
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
+            Cómo Funciona
+          </h2>
+        </motion.div>
 
-          {/* Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12 items-center">
-            {/* Text Column - Left 1/3 */}
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12 items-center">
+          {/* Text Column - Left 1/3 */}
             <div className="lg:col-span-1">
               <div className="space-y-8">
                 {steps.map((s, i) => (
@@ -89,7 +89,7 @@ export default function HowItWorksSection() {
                         : "text-gray-400 dark:text-gray-600"
                     }`}>
                       {s.title}
-                    </h3>
+                </h3>
                     <p className={`text-base md:text-lg leading-relaxed transition-colors duration-500 ${
                       activeIndex === i 
                         ? "text-gray-600 dark:text-gray-400" 
@@ -98,7 +98,7 @@ export default function HowItWorksSection() {
                       {s.description}
                     </p>
                   </div>
-                ))}
+              ))}
               </div>
             </div>
 
@@ -135,45 +135,45 @@ export default function HowItWorksSection() {
               ))}
             </div>
           </div>
-          </div>
         </div>
+      </div>
 
-        {/* Next section indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
+      {/* Next section indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
           animate={{ opacity: activeIndex === steps.length - 1 ? 1 : 0.3 }}
           transition={{ duration: 0.5 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+      >
+        <button
+          onClick={() => {
+            const element = document.getElementById("available-courses");
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+          className="flex flex-col items-center gap-1 cursor-pointer group"
         >
-          <button
-            onClick={() => {
-              const element = document.getElementById("available-courses");
-              if (element) {
-                element.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-            className="flex flex-col items-center gap-1 cursor-pointer group"
+          <span className="text-sm font-semibold tracking-wide text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors">
+            Cursos
+          </span>
+          <motion.svg
+            className="w-5 h-5 text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <span className="text-sm font-semibold tracking-wide text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors">
-              Cursos
-            </span>
-            <motion.svg
-              className="w-5 h-5 text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              animate={{ y: [0, 4, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </motion.svg>
-          </button>
-        </motion.div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </motion.svg>
+        </button>
+      </motion.div>
       </div>
 
       {/* Puntos de snap invisibles */}

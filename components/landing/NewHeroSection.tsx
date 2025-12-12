@@ -263,7 +263,7 @@ export default function NewHeroSection() {
               {/* Auth Form */}
               <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 relative">
                 {/* Close Button - Inside the card */}
-                <button
+              <button
                   onClick={() => {
                     // Limpiar la idea guardada si el usuario cierra el modal sin completar
                     if (typeof window !== 'undefined') {
@@ -274,12 +274,12 @@ export default function NewHeroSection() {
                     setShowAuthModal(false);
                   }}
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors z-20"
-                  aria-label="Cerrar"
-                >
+                aria-label="Cerrar"
+              >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
 
                 <AuthForm mode={authMode} />
               </div>
