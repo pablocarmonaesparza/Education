@@ -96,8 +96,8 @@ export default function LoginPage() {
       if (signInError) {
         setError(translateError(signInError.message));
       } else {
-        router.push('/dashboard');
-        router.refresh();
+        // Use window.location for more reliable redirect on mobile
+        window.location.href = '/dashboard';
       }
     } catch (err: any) {
       setError(translateError(err.message || 'Ocurrió un error. Intenta de nuevo.'));
