@@ -39,22 +39,22 @@ export default function RetosPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Retos</h1>
-          <p className="mt-2 text-gray-500">Próximamente...</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Retos</h1>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">Próximamente...</p>
         </div>
 
         {/* Coming Soon Card */}
         <div className="max-w-2xl mx-auto mt-16">
-          <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-100 p-12 text-center">
+          <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/50 dark:to-gray-900 rounded-2xl border border-blue-100 dark:border-blue-900 p-12 text-center">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#1472FF] to-[#5BA0FF] flex items-center justify-center">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
               ¡Retos en camino!
             </h2>
-            <p className="text-gray-600 max-w-md mx-auto">
+            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
               Estamos preparando retos personalizados para que puedas practicar y aplicar lo que aprendes. 
               Muy pronto podrás poner a prueba tus habilidades.
             </p>

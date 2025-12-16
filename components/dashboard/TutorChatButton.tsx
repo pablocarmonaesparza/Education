@@ -95,14 +95,14 @@ export default function TutorChatButton() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md bg-white/60"
+            className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md bg-white/60 dark:bg-gray-950/80"
           >
             <div className="container mx-auto px-4 py-4">
-              <div className="relative bg-white rounded-2xl border border-gray-200 flex flex-col overflow-hidden" style={{ height: '22vh', minHeight: '220px' }}>
+              <div className="relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden" style={{ height: '22vh', minHeight: '220px' }}>
               {/* Close button - Top right */}
               <button
                 onClick={() => setShowTutorChat(false)}
-                className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:text-gray-600 backdrop-blur-md bg-white/80 transition-colors z-10"
+                className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 backdrop-blur-md bg-white/80 dark:bg-gray-800/80 transition-colors z-10"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -118,14 +118,14 @@ export default function TutorChatButton() {
                         IA
                       </div>
                     ) : (
-                      <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-[10px] font-bold flex-shrink-0">
+                      <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-[10px] font-bold flex-shrink-0">
                         {userInitials}
                       </div>
                     )}
                     <div className={`px-3 py-2 max-w-[85%] rounded-2xl ${
                       msg.role === 'assistant' 
-                        ? 'text-gray-900 border border-gray-200' 
-                        : 'bg-gray-100 text-gray-900'
+                        ? 'text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700' 
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
                     }`}>
                       <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                     </div>
@@ -136,7 +136,7 @@ export default function TutorChatButton() {
                     <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#1472FF] to-[#5BA0FF] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
                       IA
                     </div>
-                    <div className="rounded-2xl px-3 py-2 border border-gray-200">
+                    <div className="rounded-2xl px-3 py-2 border border-gray-200 dark:border-gray-700">
                       <div className="flex gap-1">
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -149,24 +149,24 @@ export default function TutorChatButton() {
               </div>
 
               {/* Input field - Inside chat bubble with glass effect */}
-              <div className="px-4 pt-2 pb-3 backdrop-blur-md bg-white/80">
+              <div className="px-4 pt-2 pb-3 backdrop-blur-md bg-white/80 dark:bg-gray-900/80">
                 <form 
                   onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}
                   className="flex items-center gap-2"
                 >
-                  <div className="flex-1 flex items-center px-3 py-1.5 rounded-full border border-gray-200 focus-within:border-[#1472FF] transition-colors">
+                  <div className="flex-1 flex items-center px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 focus-within:border-[#1472FF] transition-colors">
                     <input
                       type="text"
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       placeholder="Escribe tu pregunta..."
-                      className="flex-1 bg-transparent focus:outline-none text-sm"
+                      className="flex-1 bg-transparent focus:outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                       disabled={isLoading}
                     />
                     {/* Plus icon */}
                     <button 
                       type="button"
-                      className="p-1 text-gray-300 hover:text-gray-500 transition-colors"
+                      className="p-1 text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-colors"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -175,7 +175,7 @@ export default function TutorChatButton() {
                     {/* Microphone icon */}
                     <button 
                       type="button"
-                      className="p-1 text-gray-300 hover:text-gray-500 transition-colors"
+                      className="p-1 text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-colors"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -207,7 +207,7 @@ export default function TutorChatButton() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md bg-white/60"
+            className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md bg-white/60 dark:bg-gray-950/80"
           >
             <div className="container mx-auto px-4">
               <div className="flex justify-center items-center h-20 relative">

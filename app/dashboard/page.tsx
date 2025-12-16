@@ -209,13 +209,13 @@ export default function DashboardPage() {
       <div className="flex-1 flex flex-col items-center justify-center">
         {/* Greeting */}
         {userName && (
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 text-center px-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white text-center px-4">
             {greeting}, {userName}
           </h1>
         )}
         
         {/* Project - Natural one liner based on progress */}
-        <p className="mt-4 text-lg text-gray-500 text-center px-4">
+        <p className="mt-4 text-lg text-gray-500 dark:text-gray-400 text-center px-4">
           {videos.length === 0 || videos.filter(v => v.isCompleted).length === 0
             ? '¡Comencemos tu aprendizaje!'
             : videos.filter(v => v.isCompleted).length === videos.length
@@ -227,7 +227,7 @@ export default function DashboardPage() {
         {/* Divider */}
         {videos.length > 0 && (
           <div className="w-full max-w-4xl mt-10 mb-8 px-4">
-            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent" />
           </div>
         )}
 
@@ -249,10 +249,10 @@ export default function DashboardPage() {
                 }}
                 className={`flex-shrink-0 w-[280px] snap-center rounded-2xl border transition-all duration-300 cursor-pointer ${
                   video.isCurrent
-                    ? 'border-[#1472FF] bg-gradient-to-br from-blue-50 to-white scale-105'
+                    ? 'border-[#1472FF] bg-gradient-to-br from-blue-50 to-white dark:from-blue-950 dark:to-gray-900 scale-105'
                     : video.isCompleted
-                    ? 'border-green-200 bg-green-50/50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30'
+                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
                 {/* Video Thumbnail Placeholder */}
@@ -261,7 +261,7 @@ export default function DashboardPage() {
                     ? 'bg-gradient-to-br from-[#1472FF] to-[#5BA0FF]'
                     : video.isCompleted
                     ? 'bg-gradient-to-br from-green-400 to-green-500'
-                    : 'bg-gray-100'
+                    : 'bg-gray-100 dark:bg-gray-800'
                 }`}>
                   {video.isCompleted ? (
                     <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,7 +282,7 @@ export default function DashboardPage() {
                   <span className={`absolute bottom-2 right-2 px-2 py-0.5 rounded text-xs font-medium ${
                     video.isCurrent || video.isCompleted
                       ? 'bg-white/20 text-white'
-                      : 'bg-gray-200 text-gray-600'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                   }`}>
                     {formatDuration(video.duration)}
                   </span>
@@ -297,9 +297,9 @@ export default function DashboardPage() {
                 
                 {/* Video Info */}
                 <div className="p-4">
-                  <p className="text-xs text-gray-500 mb-1">{video.phaseName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{video.phaseName}</p>
                   <h3 className={`font-medium line-clamp-2 ${
-                    video.isCurrent ? 'text-gray-900' : video.isCompleted ? 'text-gray-600' : 'text-gray-800'
+                    video.isCurrent ? 'text-gray-900 dark:text-white' : video.isCompleted ? 'text-gray-600 dark:text-gray-400' : 'text-gray-800 dark:text-gray-200'
                   }`}>
                     {video.title}
                   </h3>
@@ -307,9 +307,9 @@ export default function DashboardPage() {
                   {/* Progress indicator */}
                   <div className="mt-3 flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${
-                      video.isCompleted ? 'bg-green-500' : video.isCurrent ? 'bg-[#1472FF]' : 'bg-gray-300'
+                      video.isCompleted ? 'bg-green-500' : video.isCurrent ? 'bg-[#1472FF]' : 'bg-gray-300 dark:bg-gray-600'
                     }`} />
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {video.isCompleted ? 'Completado' : video.isCurrent ? 'En progreso' : 'Pendiente'}
                     </span>
                   </div>
@@ -325,7 +325,7 @@ export default function DashboardPage() {
         {/* Divider below carousel */}
         {videos.length > 0 && (
           <div className="w-full max-w-4xl mt-8 px-4">
-            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent" />
           </div>
         )}
 
@@ -335,20 +335,20 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               {/* Left - Video Title */}
               <div>
-                <p className="text-sm text-gray-400 mb-1">
+                <p className="text-sm text-gray-400 dark:text-gray-500 mb-1">
                   {selectedVideoIndex + 1} de {videos.length}
                 </p>
-                <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                   {videos[selectedVideoIndex].title}
                 </h2>
               </div>
               
               {/* Right - Section and Progress */}
               <div className="text-right">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {videos[selectedVideoIndex].phaseName}
                 </p>
-                <p className="text-sm font-medium text-gray-700">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {Math.round((videos.filter(v => v.isCompleted).length / videos.length) * 100)}% completado
                 </p>
               </div>
@@ -356,7 +356,7 @@ export default function DashboardPage() {
             
             {/* Video Description */}
             {videos[selectedVideoIndex].description && (
-              <p className="mt-4 text-gray-600">
+              <p className="mt-4 text-gray-600 dark:text-gray-400">
                 {videos[selectedVideoIndex].description}
               </p>
             )}

@@ -204,10 +204,10 @@ export default function SalonPage() {
           <div className="mt-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-sm text-gray-400">{currentVideo.phaseName} • {currentVideo.order + 1} de {videos.length}</p>
-                <h1 className="text-xl font-bold text-gray-900 mt-1">{currentVideo.title}</h1>
+                <p className="text-sm text-gray-400 dark:text-gray-500">{currentVideo.phaseName} • {currentVideo.order + 1} de {videos.length}</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white mt-1">{currentVideo.title}</h1>
                 {currentVideo.description && (
-                  <p className="text-gray-600 mt-2 line-clamp-2">{currentVideo.description}</p>
+                  <p className="text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">{currentVideo.description}</p>
                 )}
               </div>
               
@@ -216,7 +216,7 @@ export default function SalonPage() {
                 <button
                   onClick={handlePrevious}
                   disabled={currentVideo.order === 0}
-                  className="p-2 rounded-full border border-gray-200 text-gray-600 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -225,7 +225,7 @@ export default function SalonPage() {
                 <button
                   onClick={handleNext}
                   disabled={currentVideo.order === videos.length - 1}
-                  className="p-2 rounded-full border border-gray-200 text-gray-600 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -237,10 +237,10 @@ export default function SalonPage() {
         </div>
 
         {/* Playlist Sidebar */}
-        <div className="w-80 flex-shrink-0 h-full flex flex-col bg-gray-50 rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-gray-200 flex-shrink-0">
-            <h2 className="font-bold text-gray-900">Lista de videos</h2>
-            <p className="text-sm text-gray-500">{videos.filter(v => v.isCompleted).length} de {videos.length} completados</p>
+        <div className="w-80 flex-shrink-0 h-full flex flex-col bg-gray-50 dark:bg-gray-900 rounded-2xl overflow-hidden">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <h2 className="font-bold text-gray-900 dark:text-white">Lista de videos</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{videos.filter(v => v.isCompleted).length} de {videos.length} completados</p>
           </div>
           
           <div className="flex-1 overflow-y-auto">
@@ -260,8 +260,8 @@ export default function SalonPage() {
               return phases.map((phase, phaseIndex) => (
                 <div key={phaseIndex}>
                   {/* Phase Header */}
-                  <div className="sticky top-0 bg-gray-100 px-4 py-2 border-b border-gray-200">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">{phase.name}</h3>
+                  <div className="sticky top-0 bg-gray-100 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{phase.name}</h3>
                   </div>
                   
                   {/* Phase Videos */}
@@ -271,8 +271,8 @@ export default function SalonPage() {
                       onClick={() => handleVideoSelect(video)}
                       className={`w-full flex items-center gap-3 p-3 text-left transition-colors ${
                         currentVideo.id === video.id
-                          ? 'bg-blue-50 border-l-2 border-[#1472FF]'
-                          : 'hover:bg-gray-100 border-l-2 border-transparent'
+                          ? 'bg-blue-50 dark:bg-blue-950/50 border-l-2 border-[#1472FF]'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-800 border-l-2 border-transparent'
                       }`}
                     >
                       {/* Status Icon */}
@@ -281,7 +281,7 @@ export default function SalonPage() {
                           ? 'bg-green-500'
                           : currentVideo.id === video.id
                           ? 'bg-gradient-to-br from-[#1472FF] to-[#5BA0FF]'
-                          : 'bg-gray-200'
+                          : 'bg-gray-200 dark:bg-gray-700'
                       }`}>
                         {video.isCompleted ? (
                           <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -292,18 +292,18 @@ export default function SalonPage() {
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         ) : (
-                          <span className="text-xs text-gray-500 font-medium">{video.order + 1}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{video.order + 1}</span>
                         )}
                       </div>
                       
                       {/* Video Info */}
                       <div className="flex-1 min-w-0">
                         <h3 className={`text-sm font-medium line-clamp-2 ${
-                          currentVideo.id === video.id ? 'text-[#1472FF]' : video.isCompleted ? 'text-gray-500' : 'text-gray-900'
+                          currentVideo.id === video.id ? 'text-[#1472FF]' : video.isCompleted ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'
                         }`}>
                           {video.title}
                         </h3>
-                        <p className="text-xs text-gray-400 mt-0.5">{formatDuration(video.duration)}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{formatDuration(video.duration)}</p>
                       </div>
                     </button>
                   ))}

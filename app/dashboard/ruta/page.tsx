@@ -172,8 +172,8 @@ export default function RutaPage() {
         
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Tu Ruta de Aprendizaje</h1>
-          <p className="mt-2 text-gray-500">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Tu Ruta de Aprendizaje</h1>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">
             {completedVideos} de {totalVideos} videos completados
           </p>
         </div>
@@ -181,10 +181,10 @@ export default function RutaPage() {
         {/* Overall Progress Bar */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-500">Progreso total</span>
-            <span className="text-sm font-medium text-gray-700">{progressPercent}%</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Progreso total</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{progressPercent}%</span>
           </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] rounded-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
@@ -195,7 +195,7 @@ export default function RutaPage() {
         {/* Timeline */}
         <div className="relative">
           {/* Vertical Line */}
-          <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-gray-200" />
+          <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
 
           {/* Phases */}
           {phases.map((phase, index) => {
@@ -217,14 +217,14 @@ export default function RutaPage() {
                       ? 'bg-green-500 border-green-500'
                       : hasCurrentVideo
                       ? 'bg-gradient-to-br from-[#1472FF] to-[#5BA0FF] border-[#1472FF]'
-                      : 'bg-white border-gray-300 group-hover:border-gray-400'
+                      : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 group-hover:border-gray-400'
                   }`}>
                     {isCompleted ? (
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     ) : (
-                      <span className={`text-xs font-bold ${hasCurrentVideo ? 'text-white' : 'text-gray-500'}`}>
+                      <span className={`text-xs font-bold ${hasCurrentVideo ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                         {index + 1}
                       </span>
                     )}
@@ -234,16 +234,16 @@ export default function RutaPage() {
                   <div className="flex-1 min-w-0 pb-2">
                     <div className="flex items-center justify-between">
                       <h2 className={`text-lg font-bold ${
-                        isCompleted ? 'text-green-600' : hasCurrentVideo ? 'text-gray-900' : 'text-gray-700'
+                        isCompleted ? 'text-green-600 dark:text-green-500' : hasCurrentVideo ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'
                       }`}>
                         {phase.name}
                       </h2>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-400">
+                        <span className="text-sm text-gray-400 dark:text-gray-500">
                           {phase.completedCount}/{phase.totalCount}
                         </span>
                         <svg 
-                          className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                          className={`w-5 h-5 text-gray-400 dark:text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
                           fill="none" 
                           stroke="currentColor" 
                           viewBox="0 0 24 24"
@@ -254,7 +254,7 @@ export default function RutaPage() {
                     </div>
                     
                     {/* Phase Progress Bar */}
-                    <div className="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="mt-2 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                       <div 
                         className={`h-full rounded-full transition-all duration-300 ${
                           isCompleted 
@@ -266,7 +266,7 @@ export default function RutaPage() {
                     </div>
                     
                     {phase.description && !isExpanded && (
-                      <p className="mt-2 text-sm text-gray-500 line-clamp-1">{phase.description}</p>
+                      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{phase.description}</p>
                     )}
                   </div>
                 </button>
@@ -275,7 +275,7 @@ export default function RutaPage() {
                 {isExpanded && (
                   <div className="ml-12 mt-4 space-y-2">
                     {phase.description && (
-                      <p className="text-sm text-gray-500 mb-4">{phase.description}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{phase.description}</p>
                     )}
                     
                     {phase.videos.map((video) => (
@@ -284,10 +284,10 @@ export default function RutaPage() {
                         onClick={() => handleVideoClick(video, phase.id)}
                         className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
                           video.isCurrent
-                            ? 'border-[#1472FF] bg-blue-50'
+                            ? 'border-[#1472FF] bg-blue-50 dark:bg-blue-950/50'
                             : video.isCompleted
-                            ? 'border-green-200 bg-green-50/50'
-                            : 'border-gray-200 hover:border-gray-300 bg-white'
+                            ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-900'
                         }`}
                       >
                         {/* Status Icon */}
@@ -296,7 +296,7 @@ export default function RutaPage() {
                             ? 'bg-green-500'
                             : video.isCurrent
                             ? 'bg-gradient-to-br from-[#1472FF] to-[#5BA0FF]'
-                            : 'bg-gray-100'
+                            : 'bg-gray-100 dark:bg-gray-800'
                         }`}>
                           {video.isCompleted ? (
                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,12 +317,12 @@ export default function RutaPage() {
                         {/* Video Info */}
                         <div className="flex-1 min-w-0">
                           <h3 className={`font-medium text-sm line-clamp-1 ${
-                            video.isCompleted ? 'text-gray-600' : 'text-gray-900'
+                            video.isCompleted ? 'text-gray-600 dark:text-gray-400' : 'text-gray-900 dark:text-white'
                           }`}>
                             {video.title}
                           </h3>
                           {video.description && (
-                            <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">
+                            <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-1 mt-0.5">
                               {video.description}
                             </p>
                           )}
@@ -330,7 +330,7 @@ export default function RutaPage() {
                         
                         {/* Duration & Status */}
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-400 dark:text-gray-500">
                             {formatDuration(video.duration)}
                           </span>
                           {video.isCurrent && (
@@ -351,13 +351,13 @@ export default function RutaPage() {
         {/* Empty State */}
         {phases.length === 0 && !loading && (
           <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <svg className="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900">Sin ruta generada</h3>
-            <p className="mt-1 text-gray-500">Completa el onboarding para generar tu ruta personalizada</p>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Sin ruta generada</h3>
+            <p className="mt-1 text-gray-500 dark:text-gray-400">Completa el onboarding para generar tu ruta personalizada</p>
           </div>
         )}
       </div>
