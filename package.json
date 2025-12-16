@@ -27,7 +27,7 @@
     "eslint-config-next": "^16.0.1",
     "framer-motion": "^12.23.24",
     "mercadopago": "^2.10.0",
-    "next": "^15.5.6",
+    "next": "^16.0.10",
     "openai": "^6.9.1",
     "postcss": "^8.5.6",
     "react": "^19.2.0",
