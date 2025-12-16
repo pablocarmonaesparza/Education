@@ -154,7 +154,7 @@ export default function SalonPage() {
 
   if (isLoading) {
     return (
-      <div className="h-[calc(100vh-11rem)] bg-transparent flex items-center justify-center">
+      <div className="h-[calc(100vh-10rem)] md:h-[calc(100vh-11rem)] bg-transparent flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#1472FF] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -162,7 +162,7 @@ export default function SalonPage() {
 
   if (!currentVideo) {
     return (
-      <div className="h-[calc(100vh-11rem)] bg-transparent flex flex-col items-center justify-center">
+      <div className="h-[calc(100vh-10rem)] md:h-[calc(100vh-11rem)] bg-transparent flex flex-col items-center justify-center">
         <div className="w-16 h-16 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
           <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -175,7 +175,7 @@ export default function SalonPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-11rem)] bg-transparent overflow-hidden">
+    <div className="h-[calc(100vh-10rem)] md:h-[calc(100vh-11rem)] bg-transparent overflow-hidden">
       <div className="h-full flex gap-4 p-4 max-w-7xl mx-auto w-full">
         
         {/* Main Video Area */}

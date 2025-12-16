@@ -13,7 +13,7 @@ const AuthForm = dynamic(() => import("@/components/auth/AuthForm"), {
   ),
 });
 
-const MIN_CHARACTERS = 200;
+const MIN_CHARACTERS = 100;
 const MAX_CHARACTERS = 1000;
 
 export default function NewHeroSection() {
@@ -25,12 +25,7 @@ export default function NewHeroSection() {
   const [isValidating, setIsValidating] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
-    }
-  }, [idea]);
+  // Fixed height textarea - no auto-expand
 
   const handleIdeaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -124,8 +119,8 @@ export default function NewHeroSection() {
         >
           <div className="max-w-xl mx-auto">
             {/* Textarea wrapper with counter */}
-            <div className={`relative w-full bg-white dark:bg-gray-900 rounded-3xl border-2 transition-all duration-300 ${
-                  validationError || idea.length > MAX_CHARACTERS ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-700"
+            <div className={`relative w-full bg-white dark:bg-gray-900 rounded-2xl border-2 transition-all duration-300 ${
+                  validationError || idea.length > MAX_CHARACTERS ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-700 focus-within:border-[#1472FF]"
                 }`}>
               <textarea
                 ref={textareaRef}
@@ -135,15 +130,16 @@ export default function NewHeroSection() {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 placeholder="Describe tu idea y haremos un curso personalizado para ti."
-                className="w-full bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none focus:ring-0 font-light leading-relaxed p-4 pb-2 overflow-hidden"
-                rows={1}
-                style={{ minHeight: '56px', height: '56px' }}
+                className="w-full bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none focus:ring-0 font-light leading-relaxed px-4 py-3"
+                rows={2}
               />
 
-              {/* Character count - Inside wrapper, below text */}
-              <div className="px-4 pb-3 text-right">
-                <p className="text-xs text-gray-400 dark:text-gray-500 font-light">
-                  Mínimo {idea.length}/{MIN_CHARACTERS} caracteres
+              {/* Character count */}
+              <div className="px-4 pb-2 flex justify-end">
+                <p className={`text-xs font-medium ${
+                  idea.length >= MIN_CHARACTERS ? "text-green-500" : "text-gray-400 dark:text-gray-500"
+                }`}>
+                  {idea.length}/{MIN_CHARACTERS}
                 </p>
               </div>
             </div>

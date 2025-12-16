@@ -10,6 +10,7 @@ export default function DashboardNavbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const navRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
@@ -34,13 +35,30 @@ export default function DashboardNavbar() {
   }, [supabase]);
 
   const navLinks = [
-    { href: '/dashboard', label: 'Inicio' },
-    { href: '/dashboard/ruta', label: 'Ruta' },
-    { href: '/dashboard/salon', label: 'Salón' },
-    { href: '/dashboard/retos', label: 'Retos' },
+    { href: '/dashboard', label: 'Inicio', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+    )},
+    { href: '/dashboard/ruta', label: 'Ruta', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+      </svg>
+    )},
+    { href: '/dashboard/salon', label: 'Salón', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    )},
+    { href: '/dashboard/retos', label: 'Retos', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    )},
   ];
 
-  // Update indicator position
+  // Update indicator position (desktop only)
   useEffect(() => {
     if (navRef.current) {
       const activeLink = navRef.current.querySelector(`[data-active="true"]`) as HTMLElement;
@@ -53,6 +71,11 @@ export default function DashboardNavbar() {
         });
       }
     }
+  }, [pathname]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setShowMobileMenu(false);
   }, [pathname]);
 
   // Get user initials
@@ -68,142 +91,259 @@ export default function DashboardNavbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/60">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-20 relative">
-          
-          {/* Logo - Left */}
-          <Link href="/dashboard" className="flex items-center">
-            <Image
-              src="/images/logo-dark.png"
-              alt="Itera"
-              width={120}
-              height={40}
-              className="h-8 w-auto"
-              priority
-            />
-          </Link>
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/60 dark:bg-gray-950/60">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center h-16 md:h-20 relative">
+            
+            {/* Logo - Left */}
+            <Link href="/dashboard" className="flex items-center">
+              <Image
+                src="/images/logo-dark.png"
+                alt="Itera"
+                width={120}
+                height={40}
+                className="h-7 md:h-8 w-auto"
+                priority
+              />
+            </Link>
 
-          {/* Navigation - Center */}
-          <div 
-            ref={navRef}
-            className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2"
-          >
+            {/* Navigation - Center (Desktop only) */}
+            <div 
+              ref={navRef}
+              className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2"
+            >
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    data-active={isActive}
+                    className={`relative pb-1 text-sm font-medium transition-colors duration-300 ${
+                      isActive
+                        ? 'text-[#1472FF]'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+              
+              {/* Sliding indicator */}
+              <div
+                className="absolute bottom-0 h-0.5 bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] rounded-full transition-all duration-300"
+                style={{
+                  left: indicatorStyle.left,
+                  width: indicatorStyle.width,
+                }}
+              />
+            </div>
+
+            {/* Right side - Upgrade + Profile (Desktop) */}
+            <div className="hidden md:flex items-center gap-3">
+              {/* Upgrade Plan */}
+              <button 
+                className="px-4 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-all relative bg-transparent"
+              >
+                <span 
+                  className="absolute inset-0 rounded-full z-0"
+                  style={{
+                    background: 'linear-gradient(90deg, #1472FF 0%, #5BA0FF 50%, #1472FF 100%)',
+                  }}
+                />
+                <span 
+                  className="absolute inset-[2px] rounded-full bg-white dark:bg-gray-900 z-[1]"
+                />
+                <span className="relative z-[2] bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] bg-clip-text text-transparent">
+                  Mejorar Plan
+                </span>
+              </button>
+              
+              {/* Profile button */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="h-10 w-10 rounded-full overflow-hidden border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-colors focus:outline-none focus:border-gray-300"
+                >
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={userName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#1472FF] to-[#5BA0FF] flex items-center justify-center text-white text-xs font-semibold">
+                    {userInitials}
+                  </div>
+                )}
+              </button>
+
+              {/* Profile dropdown */}
+              {showProfileMenu && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setShowProfileMenu(false)} 
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 py-1 z-20">
+                    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{userName || 'Usuario'}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.profile?.email}</p>
+                    </div>
+                    <Link
+                      href="/dashboard/perfil"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Mi Perfil
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Cerrar sesión
+                    </button>
+                  </div>
+                </>
+              )}
+              </div>
+            </div>
+
+            {/* Mobile: Profile + Hamburger */}
+            <div className="flex md:hidden items-center gap-2">
+              {/* Profile button (mobile) */}
+              <button
+                onClick={() => {
+                  setShowMobileMenu(false);
+                  setShowProfileMenu(!showProfileMenu);
+                }}
+                className="h-9 w-9 rounded-full overflow-hidden border-2 border-transparent"
+              >
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={userName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#1472FF] to-[#5BA0FF] flex items-center justify-center text-white text-xs font-semibold">
+                    {userInitials}
+                  </div>
+                )}
+              </button>
+
+              {/* Hamburger button */}
+              <button 
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  setShowMobileMenu(!showMobileMenu);
+                }}
+                className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                {showMobileMenu ? (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Profile Dropdown */}
+        {showProfileMenu && (
+          <div className="md:hidden absolute right-4 top-16 w-48 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 py-1 z-50 shadow-lg">
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{userName || 'Usuario'}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.profile?.email}</p>
+            </div>
+            <Link
+              href="/dashboard/perfil"
+              onClick={() => setShowProfileMenu(false)}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Mi Perfil
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Cerrar sesión
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      {showMobileMenu && (
+        <div 
+          className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40 md:hidden"
+          onClick={() => setShowMobileMenu(false)}
+        />
+      )}
+
+      {/* Mobile Menu Drawer */}
+      <div className={`fixed top-16 left-0 right-0 bg-white dark:bg-gray-950 z-40 md:hidden transform transition-transform duration-300 ease-out ${
+        showMobileMenu ? 'translate-y-0' : '-translate-y-full'
+      }`}>
+        <div className="container mx-auto px-4 py-4">
+          {/* Navigation Links */}
+          <div className="space-y-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  data-active={isActive}
-                  className={`relative pb-1 text-sm font-medium transition-colors duration-300 ${
+                  onClick={() => setShowMobileMenu(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                     isActive
-                      ? 'text-[#1472FF]'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-[#1472FF]/10 to-[#5BA0FF]/10 text-[#1472FF]'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
                   }`}
                 >
-                  {link.label}
+                  {link.icon}
+                  <span className="font-medium">{link.label}</span>
+                  {isActive && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#1472FF]" />
+                  )}
                 </Link>
               );
             })}
-            
-            {/* Sliding indicator */}
-            <div
-              className="absolute bottom-0 h-0.5 bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] rounded-full transition-all duration-300"
-              style={{
-                left: indicatorStyle.left,
-                width: indicatorStyle.width,
-              }}
-            />
           </div>
 
-          {/* Right side - Upgrade + Profile */}
-          <div className="flex items-center gap-3">
-            {/* Upgrade Plan */}
-            <button 
-              className="hidden md:block px-4 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-all relative bg-transparent"
-            >
-              <span 
-                className="absolute inset-0 rounded-full z-0"
-                style={{
-                  background: 'linear-gradient(90deg, #1472FF 0%, #5BA0FF 50%, #1472FF 100%)',
-                }}
-              />
-              <span 
-                className="absolute inset-[2px] rounded-full bg-white z-[1]"
-              />
-              <span className="relative z-[2] bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] bg-clip-text text-transparent">
-                Mejorar Plan
-              </span>
-            </button>
-            
-            {/* Profile button */}
-            <div className="relative">
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="h-10 w-10 rounded-full overflow-hidden border-2 border-transparent hover:border-gray-200 transition-colors focus:outline-none focus:border-gray-300"
-              >
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={userName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[#1472FF] to-[#5BA0FF] flex items-center justify-center text-white text-xs font-semibold">
-                  {userInitials}
-                </div>
-              )}
-            </button>
+          {/* Divider */}
+          <div className="my-4 h-px bg-gray-200 dark:bg-gray-800" />
 
-            {/* Profile dropdown */}
-            {showProfileMenu && (
-              <>
-                <div 
-                  className="fixed inset-0 z-10" 
-                  onClick={() => setShowProfileMenu(false)} 
-                />
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl border border-gray-200 py-1 z-20">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-900 truncate">{userName || 'Usuario'}</p>
-                    <p className="text-xs text-gray-500 truncate">{user?.profile?.email}</p>
-                  </div>
-                  <Link
-                    href="/dashboard/perfil"
-                    onClick={() => setShowProfileMenu(false)}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    Mi Perfil
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Cerrar sesión
-                  </button>
-                </div>
-              </>
-            )}
-            </div>
-          </div>
-
-          {/* Mobile menu button */}
-          <button className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+          {/* Upgrade Plan Button (Mobile) */}
+          <button 
+            className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] hover:opacity-90 transition-all flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
+            Mejorar Plan
           </button>
         </div>
       </div>
-    </nav>
+    </>
   );
 }
-
-
-

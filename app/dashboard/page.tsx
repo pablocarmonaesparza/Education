@@ -198,14 +198,14 @@ export default function DashboardPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="h-[calc(100vh-11rem)] bg-transparent flex items-center justify-center">
+      <div className="h-[calc(100vh-10rem)] md:h-[calc(100vh-11rem)] bg-transparent flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#1472FF] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="h-[calc(100vh-11rem)] bg-transparent flex flex-col overflow-hidden">
+    <div className="h-[calc(100vh-10rem)] md:h-[calc(100vh-11rem)] bg-transparent flex flex-col overflow-hidden">
       <div className="flex-1 flex flex-col items-center justify-center">
         {/* Greeting */}
         {userName && (

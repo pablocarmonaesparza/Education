@@ -158,7 +158,7 @@ export default function RutaPage() {
 
   if (loading) {
     return (
-      <div className="h-[calc(100vh-11rem)] bg-transparent flex items-center justify-center">
+      <div className="h-[calc(100vh-10rem)] md:h-[calc(100vh-11rem)] bg-transparent flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#1472FF] border-t-transparent rounded-full animate-spin" />
       </div>
     );
