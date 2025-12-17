@@ -3,15 +3,18 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
+  
+  // Use the canonical domain without www
+  const baseUrl = 'https://itera.la'
 
   // Handle OAuth errors
   if (error) {
     console.error('OAuth error:', error, errorDescription)
-    return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(errorDescription || error)}`)
+    return NextResponse.redirect(`${baseUrl}/auth/login?error=${encodeURIComponent(errorDescription || error)}`)
   }
 
   if (code) {
@@ -20,7 +23,7 @@ export async function GET(request: Request) {
     
     if (exchangeError) {
       console.error('Error exchanging code:', exchangeError)
-      return NextResponse.redirect(`${origin}/auth/login?error=confirmation_failed`)
+      return NextResponse.redirect(`${baseUrl}/auth/login?error=confirmation_failed`)
     }
 
     // Check if there's a pending project idea from the landing page
@@ -34,7 +37,7 @@ export async function GET(request: Request) {
     if (user) {
       // If there's a pending idea, always redirect to onboarding to create the course
       if (hasPendingIdea) {
-        return NextResponse.redirect(`${origin}/onboarding`)
+        return NextResponse.redirect(`${baseUrl}/onboarding`)
       }
 
       // Check if user has a personalized path
@@ -47,16 +50,16 @@ export async function GET(request: Request) {
         .maybeSingle()
 
       if (intakeData?.generated_path) {
-        return NextResponse.redirect(`${origin}/dashboard`)
+        return NextResponse.redirect(`${baseUrl}/dashboard`)
       } else {
-        return NextResponse.redirect(`${origin}/onboarding`)
+        return NextResponse.redirect(`${baseUrl}/onboarding`)
       }
     }
 
     // Default redirect to onboarding for new users
-    return NextResponse.redirect(`${origin}/onboarding`)
+    return NextResponse.redirect(`${baseUrl}/onboarding`)
   }
 
   // No code provided, redirect to login
-  return NextResponse.redirect(`${origin}/auth/login?error=no_code`)
+  return NextResponse.redirect(`${baseUrl}/auth/login?error=no_code`)
 }
