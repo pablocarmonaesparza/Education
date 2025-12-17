@@ -138,12 +138,12 @@ export default function HowItWorksSection() {
         </div>
       </div>
 
-      {/* Next section indicator */}
+      {/* Next section indicator - hidden on mobile */}
       <motion.div
         initial={{ opacity: 0 }}
           animate={{ opacity: activeIndex === steps.length - 1 ? 1 : 0.3 }}
           transition={{ duration: 0.5 }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden md:block"
       >
         <button
           onClick={() => {
@@ -176,13 +176,13 @@ export default function HowItWorksSection() {
       </motion.div>
       </div>
 
-      {/* Puntos de snap invisibles */}
-      <div className="absolute inset-0">
+      {/* Puntos de snap invisibles - only snap on desktop */}
+      <div className="absolute inset-0 pointer-events-none">
         {steps.map((_, i) => (
           <div
             key={i}
             ref={(el) => { snapRefs.current[i] = el; }}
-            className="h-screen snap-start"
+            className="h-screen md:snap-start"
           />
         ))}
       </div>

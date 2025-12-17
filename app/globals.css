@@ -20,6 +20,13 @@ html {
   background-color: #ffffff;
 }
 
+/* Snap scroll only on desktop */
+@media (min-width: 768px) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+}
+
 html.dark {
   background-color: #030712;
 }
