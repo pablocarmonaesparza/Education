@@ -15,16 +15,25 @@
 }
 
 html {
-  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
+  overscroll-behavior: none;
+  background-color: #ffffff;
 }
 
-section {
-  scroll-snap-align: start;
+html.dark {
+  background-color: #030712;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    background-color: #030712;
+  }
 }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  overscroll-behavior: none;
+  background-color: inherit;
 }
 
 /* Apply Darker Grotesque to all headings and subtitle paragraphs */
