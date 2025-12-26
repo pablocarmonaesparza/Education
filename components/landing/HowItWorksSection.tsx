@@ -30,6 +30,8 @@ export default function HowItWorksSection() {
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
   const snapRefs = useRef<(HTMLDivElement | null)[]>([]);
   const mobileScrollRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
 
   // Desktop: Detectar qué punto de snap está visible
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function HowItWorksSection() {
     return () => observers.forEach((o) => o.disconnect());
   }, []);
 
-  // Mobile: Detectar scroll horizontal y convertir scroll vertical a horizontal
+  // Mobile: Detectar scroll horizontal
   useEffect(() => {
     const container = mobileScrollRef.current;
     if (!container) return;
@@ -68,46 +70,67 @@ export default function HowItWorksSection() {
       setMobileActiveIndex(Math.min(newIndex, steps.length - 1));
     };
 
-    // Convertir scroll vertical a horizontal
-    const handleWheel = (e: WheelEvent) => {
-      // Solo en móvil (< 768px)
-      if (window.innerWidth >= 768) return;
-      
-      const scrollLeft = container.scrollLeft;
-      const maxScroll = container.scrollWidth - container.offsetWidth;
-      
-      // Si estamos al inicio y scrolleamos hacia arriba, dejar pasar
-      if (scrollLeft <= 0 && e.deltaY < 0) return;
-      
-      // Si estamos al final y scrolleamos hacia abajo, dejar pasar
-      if (scrollLeft >= maxScroll - 1 && e.deltaY > 0) return;
-      
-      // Prevenir scroll vertical y convertir a horizontal
-      e.preventDefault();
-      container.scrollBy({
-        left: e.deltaY,
-        behavior: 'auto'
-      });
-    };
-
     container.addEventListener('scroll', handleScroll);
-    container.addEventListener('wheel', handleWheel, { passive: false });
     
     return () => {
       container.removeEventListener('scroll', handleScroll);
-      container.removeEventListener('wheel', handleWheel);
     };
   }, []);
+
+  // Mobile: Manejar touch para convertir swipe vertical a horizontal
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const container = mobileScrollRef.current;
+    if (!container) return;
+
+    const touchCurrentY = e.touches[0].clientY;
+    const touchCurrentX = e.touches[0].clientX;
+    const deltaY = touchStartY.current - touchCurrentY;
+    const deltaX = touchStartX.current - touchCurrentX;
+
+    // Si el movimiento es más vertical que horizontal
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      const scrollLeft = container.scrollLeft;
+      const maxScroll = container.scrollWidth - container.offsetWidth;
+      
+      // Si no estamos en los límites, convertir a horizontal
+      const atStart = scrollLeft <= 0 && deltaY < 0;
+      const atEnd = scrollLeft >= maxScroll - 1 && deltaY > 0;
+      
+      if (!atStart && !atEnd) {
+        e.preventDefault();
+        container.scrollLeft += deltaY * 0.5;
+        touchStartY.current = touchCurrentY;
+      }
+    }
+  };
+
+  // Navegar al siguiente/anterior slide
+  const goToSlide = (index: number) => {
+    const container = mobileScrollRef.current;
+    if (container) {
+      container.scrollTo({
+        left: index * container.offsetWidth,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
     <>
       {/* ============ MOBILE VERSION (< 768px) ============ */}
       <section
         id="how-it-works"
-        className="md:hidden min-h-screen bg-white dark:bg-gray-950 flex flex-col pt-20 pb-8"
+        className="md:hidden min-h-screen bg-white dark:bg-gray-950 flex flex-col"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
       >
         {/* Header */}
-        <div className="px-6 mb-6">
+        <div className="px-6 pt-20 pb-4">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             Cómo Funciona
           </h2>
@@ -116,18 +139,18 @@ export default function HowItWorksSection() {
         {/* Horizontal Scroll Container */}
         <div
           ref={mobileScrollRef}
-          className="flex-1 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-          style={{ scrollSnapType: 'x mandatory' }}
+          className="flex-1 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-x"
+          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {steps.map((step, i) => (
             <div
               key={i}
-              className="flex-shrink-0 w-full snap-center px-6 flex flex-col"
+              className="flex-shrink-0 w-full snap-center px-6 flex flex-col justify-center"
               style={{ scrollSnapAlign: 'center' }}
             >
               {/* Text - Top */}
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+              <div className="mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {step.title}
                 </h3>
                 <p className="text-base text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -136,8 +159,8 @@ export default function HowItWorksSection() {
               </div>
 
               {/* Image - Bottom */}
-              <div className="flex-1 flex items-center justify-center">
-                <div className="relative w-full h-64">
+              <div className="flex items-center justify-center">
+                <div className="relative w-full h-72">
                   <Image
                     src={step.imageLight}
                     alt={step.title}
@@ -159,23 +182,15 @@ export default function HowItWorksSection() {
         </div>
 
         {/* Pagination Dots */}
-        <div className="flex justify-center gap-2 pb-4">
+        <div className="flex justify-center gap-3 py-6">
           {steps.map((_, i) => (
             <button
               key={i}
-              onClick={() => {
-                const container = mobileScrollRef.current;
-                if (container) {
-                  container.scrollTo({
-                    left: i * container.offsetWidth,
-                    behavior: 'smooth'
-                  });
-                }
-              }}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              onClick={() => goToSlide(i)}
+              className={`h-2 rounded-full transition-all duration-300 ${
                 mobileActiveIndex === i
-                  ? "bg-[#1472FF] w-6"
-                  : "bg-gray-300 dark:bg-gray-600"
+                  ? "bg-[#1472FF] w-8"
+                  : "bg-gray-300 dark:bg-gray-600 w-2"
               }`}
             />
           ))}
