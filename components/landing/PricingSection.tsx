@@ -1,36 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
-type Currency = "USD" | "MXN" | "ARS" | "COP";
-
 export default function PricingSection() {
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>("USD");
   const router = useRouter();
 
-  const exchangeRates = {
-    USD: 1,
-    MXN: 20,
-    ARS: 1000,
-    COP: 4200,
-  };
-
   const formatPrice = (usdPrice: number, isMonthly: boolean = false) => {
-    const price = Math.round(usdPrice * exchangeRates[selectedCurrency]);
-    const symbols = {
-      USD: "$",
-      MXN: "$",
-      ARS: "$",
-      COP: "$",
-    };
-    
     if (usdPrice === 0) {
       return "Gratis";
     }
-    
-    return `${symbols[selectedCurrency]}${price.toLocaleString()}${isMonthly ? "/mes" : ""}`;
+    return `$${usdPrice}${isMonthly ? "/mes" : ""}`;
   };
 
   const handleSelectPlan = () => {
@@ -89,7 +69,7 @@ export default function PricingSection() {
   ];
 
   return (
-    <section id="pricing" className="relative bg-white dark:bg-gray-950 min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20 pb-20">
+    <section id="pricing" className="relative bg-white dark:bg-gray-950 min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20 pb-24">
       <div className="container mx-auto px-4 relative z-10 w-full">
         {/* Section Header */}
         <motion.div
@@ -101,36 +81,11 @@ export default function PricingSection() {
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-900 dark:text-white mb-4 leading-tight">
             Nuestros Planes
           </h2>
-          <p className="text-lg md:text-xl text-center text-gray-600 dark:text-gray-400 mb-16 max-w-3xl mx-auto font-light">
+          <p className="text-lg md:text-xl text-center text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto font-light">
             Elige el plan que mejor se adapte a tus necesidades.
             <br />
             <span className="text-[#1472FF] font-semibold">Comienza gratis y escala cuando estés listo.</span>
           </p>
-        </motion.div>
-
-        {/* Currency Selector */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-          className="flex justify-center mb-12"
-        >
-          <div className="bg-white dark:bg-gray-800 rounded-full p-1 flex space-x-1 border border-gray-200 dark:border-gray-700">
-            {(["USD", "MXN", "ARS", "COP"] as Currency[]).map((currency) => (
-              <button
-                key={currency}
-                onClick={() => setSelectedCurrency(currency)}
-                className={`px-6 py-2 rounded-full font-semibold transition-all ${
-                  selectedCurrency === currency
-                    ? "bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                }`}
-              >
-                {currency}
-              </button>
-            ))}
-          </div>
         </motion.div>
 
         {/* Pricing Cards */}
@@ -171,7 +126,7 @@ export default function PricingSection() {
                     {formatPrice(tier.price, tier.isMonthly)}
                   </span>
                   {tier.price > 0 && (
-                  <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{selectedCurrency}</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">USD</span>
                   )}
                 </div>
                 <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -225,7 +180,7 @@ export default function PricingSection() {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.6 }}
         viewport={{ once: true }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden md:block"
+        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 hidden md:block"
       >
         <button
           onClick={() => {
