@@ -247,18 +247,19 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Fullscreen */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="lg:hidden overflow-hidden bg-white dark:bg-gray-900 backdrop-blur-lg border-t border-gray-200/50 dark:border-gray-700/50 relative z-50"
+            className="lg:hidden fixed inset-0 top-20 bg-white dark:bg-gray-950 z-50 flex flex-col"
           >
-            <div className="container mx-auto px-4 py-6">
-              <div className="flex flex-col gap-4">
+            {/* Navigation Links - Top */}
+            <div className="px-6 pt-6">
+              <div className="flex flex-col gap-2">
                 {navLinks.map((link, index) => (
                   <motion.div
                     key={link.href}
@@ -269,33 +270,38 @@ export default function Navbar() {
                     <a
                       href={link.href}
                       onClick={(e) => handleNavClick(e, link.href)}
-                      className={`block py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all font-medium cursor-pointer ${
+                      className={`block py-3 px-4 rounded-xl transition-all font-medium text-lg cursor-pointer ${
                         activeSection === link.id
                           ? "text-[#1472FF] bg-blue-50 dark:bg-blue-900/30"
-                          : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                       }`}
                     >
                       {link.label}
                     </a>
                   </motion.div>
                 ))}
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.3 }}
-                  className="pt-4 border-t border-gray-200 dark:border-gray-700"
-                >
-                  <Link
-                    href="/auth/signup"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block py-3 px-4 text-center font-semibold rounded-lg transition-all navbar-button-gradient text-white hover:opacity-90"
-                  >
-                    Regístrate Gratis
-                  </Link>
-                </motion.div>
               </div>
             </div>
+
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* CTA Button - Bottom with safe area padding */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.3 }}
+              className="px-6 pb-safe"
+              style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}
+            >
+              <Link
+                href="/auth/signup"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-4 text-center font-semibold text-lg rounded-2xl transition-all navbar-button-gradient text-white hover:opacity-90"
+              >
+                Regístrate Gratis
+              </Link>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
