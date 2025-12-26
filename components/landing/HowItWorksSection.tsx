@@ -61,7 +61,7 @@ export default function HowItWorksSection() {
       style={{ height: `${steps.length * 100}vh` }}
     >
       {/* Contenido visual sticky */}
-      <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden pt-20 pb-20">
+      <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
         {/* Section Header */}
         <motion.div
@@ -69,7 +69,7 @@ export default function HowItWorksSection() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           viewport={{ once: true }}
-          className="text-center mb-16 md:mb-20"
+          className="text-center mb-8 md:mb-10"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
             Cómo Funciona
