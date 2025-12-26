@@ -247,7 +247,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu - Fullscreen */}
+      {/* Mobile Menu - Fullscreen (phones only) */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -255,7 +255,7 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="lg:hidden fixed inset-0 top-20 bg-white dark:bg-gray-950 z-50 flex flex-col"
+            className="md:hidden fixed inset-0 top-20 bg-white dark:bg-gray-950 z-50 flex flex-col"
           >
             {/* Navigation Links - Top */}
             <div className="px-6 pt-6">
@@ -291,7 +291,7 @@ export default function Navbar() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.3 }}
-              className="px-6 pb-safe"
+              className="px-6"
               style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}
             >
               <Link
@@ -302,6 +302,59 @@ export default function Navbar() {
                 Regístrate Gratis
               </Link>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Tablet Menu - Popup (md to lg) */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="hidden md:block lg:hidden overflow-hidden bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
+          >
+            <div className="container mx-auto px-4 py-6">
+              <div className="flex flex-col gap-4">
+                {navLinks.map((link, index) => (
+                  <motion.div
+                    key={link.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * index, duration: 0.3 }}
+                  >
+                    <a
+                      href={link.href}
+                      onClick={(e) => handleNavClick(e, link.href)}
+                      className={`block py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all font-medium cursor-pointer ${
+                        activeSection === link.id
+                          ? "text-[#1472FF] bg-blue-50 dark:bg-blue-900/30"
+                          : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      }`}
+                    >
+                      {link.label}
+                    </a>
+                  </motion.div>
+                ))}
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                  className="pt-4 border-t border-gray-200 dark:border-gray-700"
+                >
+                  <Link
+                    href="/auth/signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-3 px-4 text-center font-semibold rounded-lg transition-all navbar-button-gradient text-white hover:opacity-90"
+                  >
+                    Regístrate Gratis
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
