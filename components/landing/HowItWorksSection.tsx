@@ -129,13 +129,6 @@ export default function HowItWorksSection() {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
       >
-        {/* Header */}
-        <div className="px-6 pt-20 pb-4">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Cómo Funciona
-          </h2>
-        </div>
-
         {/* Horizontal Scroll Container */}
         <div
           ref={mobileScrollRef}
@@ -145,44 +138,42 @@ export default function HowItWorksSection() {
           {steps.map((step, i) => (
             <div
               key={i}
-              className="flex-shrink-0 w-full snap-center px-6 flex flex-col justify-center"
+              className="flex-shrink-0 w-full snap-center px-6 flex flex-col items-center justify-center min-h-screen"
               style={{ scrollSnapAlign: 'center' }}
             >
-              {/* Text - Top */}
-              <div className="mb-4">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
+              {/* Title */}
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center">
+                {step.title}
+              </h3>
+              
+              {/* Description */}
+              <p className="text-base text-gray-600 dark:text-gray-400 leading-relaxed text-center max-w-sm mb-8">
+                {step.description}
+              </p>
 
-              {/* Image - Bottom */}
-              <div className="flex items-center justify-center">
-                <div className="relative w-full h-72">
-                  <Image
-                    src={step.imageLight}
-                    alt={step.title}
-                    fill
-                    className="object-contain dark:hidden"
-                    priority={i === 0}
-                  />
-                  <Image
-                    src={step.imageDark}
-                    alt={step.title}
-                    fill
-                    className="object-contain hidden dark:block"
-                    priority={i === 0}
-                  />
-                </div>
+              {/* Image */}
+              <div className="relative w-full h-64">
+                <Image
+                  src={step.imageLight}
+                  alt={step.title}
+                  fill
+                  className="object-contain dark:hidden"
+                  priority={i === 0}
+                />
+                <Image
+                  src={step.imageDark}
+                  alt={step.title}
+                  fill
+                  className="object-contain hidden dark:block"
+                  priority={i === 0}
+                />
               </div>
             </div>
           ))}
         </div>
 
         {/* Pagination Dots */}
-        <div className="flex justify-center gap-3 py-6">
+        <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-3">
           {steps.map((_, i) => (
             <button
               key={i}
