@@ -255,7 +255,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="lg:hidden overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200/50 dark:border-gray-700/50"
+            className="lg:hidden overflow-hidden bg-white dark:bg-gray-900 backdrop-blur-lg border-t border-gray-200/50 dark:border-gray-700/50 relative z-50"
           >
             <div className="container mx-auto px-4 py-6">
               <div className="flex flex-col gap-4">
