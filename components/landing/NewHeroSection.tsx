@@ -96,8 +96,8 @@ export default function NewHeroSection() {
   };
 
   return (
-    <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-950 overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-950 overflow-hidden pt-20 pb-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-1 flex flex-col items-center justify-center">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
