@@ -176,13 +176,13 @@ export default function HowItWorksSection() {
       </motion.div>
       </div>
 
-      {/* Puntos de snap invisibles - only snap on desktop */}
+      {/* Puntos de snap invisibles */}
       <div className="absolute inset-0 pointer-events-none">
         {steps.map((_, i) => (
           <div
             key={i}
             ref={(el) => { snapRefs.current[i] = el; }}
-            className="h-screen md:snap-start"
+            className="h-screen snap-start"
           />
         ))}
       </div>

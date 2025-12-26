@@ -20,10 +20,22 @@ html {
   background-color: #ffffff;
 }
 
-/* Snap scroll only on desktop */
+/* Snap scroll - disabled on mobile, enabled on desktop */
+html {
+  scroll-snap-type: none;
+}
+
 @media (min-width: 768px) {
   html {
-    scroll-snap-type: y proximity;
+    scroll-snap-type: y mandatory;
+  }
+  
+  section {
+    scroll-snap-align: start;
+  }
+  
+  .snap-start {
+    scroll-snap-align: start;
   }
 }
 
