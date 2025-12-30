@@ -241,15 +241,17 @@ export default function DashboardPage() {
             {/* Left spacer for first card centering */}
             <div className="flex-shrink-0 w-[calc(50vw-156px)]" />
             
-            {videos.map((video) => (
+            {videos.map((video, index) => (
               <div
                 key={video.id}
                 onClick={() => {
                   router.push(`/dashboard/salon?video=${video.order}`);
                 }}
                 className={`flex-shrink-0 w-[280px] snap-center rounded-2xl border transition-all duration-300 cursor-pointer ${
+                  index === selectedVideoIndex ? 'scale-110 z-10' : 'scale-95 opacity-70'
+                } ${
                   video.isCurrent
-                    ? 'border-[#1472FF] bg-gradient-to-br from-blue-50 to-white dark:from-blue-950 dark:to-gray-900 scale-105'
+                    ? 'border-[#1472FF] bg-gradient-to-br from-blue-50 to-white dark:from-blue-950 dark:to-gray-900'
                     : video.isCompleted
                     ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30'
                     : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600'
