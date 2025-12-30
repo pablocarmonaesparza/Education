@@ -25,6 +25,7 @@ function SalonContent() {
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasAutoCompleted, setHasAutoCompleted] = useState<Set<string>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const videoRef = useRef<HTMLVideoElement>(null);
   const supabase = createClient();
 
@@ -52,6 +53,14 @@ function SalonContent() {
               .filter((p: any) => p.completed)
               .map((p: any) => p.video_id)
           );
+
+          // Fetch favorites
+          const { data: favoritesData } = await supabase
+            .from('video_favorites')
+            .select('video_id')
+            .eq('user_id', user.id);
+
+          setFavorites(new Set((favoritesData || []).map((f: any) => f.video_id)));
 
           const path = intakeData.generated_path;
           const allVideos: Video[] = [];
@@ -207,6 +216,40 @@ function SalonContent() {
     }
   };
 
+  // Toggle favorite status
+  const toggleFavorite = async (videoId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const isFavorite = favorites.has(videoId);
+
+    if (isFavorite) {
+      // Remove from favorites
+      await supabase
+        .from('video_favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('video_id', videoId);
+      
+      setFavorites(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(videoId);
+        return newSet;
+      });
+    } else {
+      // Add to favorites
+      await supabase
+        .from('video_favorites')
+        .upsert({
+          user_id: user.id,
+          video_id: videoId,
+          created_at: new Date().toISOString()
+        }, { onConflict: 'user_id,video_id' });
+      
+      setFavorites(prev => new Set(prev).add(videoId));
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="h-[calc(100vh-10rem)] md:h-[calc(100vh-11rem)] bg-transparent flex items-center justify-center">
@@ -268,45 +311,38 @@ function SalonContent() {
                 )}
               </div>
               
-              {/* Complete/Pending Toggle Button */}
-              <button
-                onClick={() => toggleVideoCompletion(currentVideo.id, currentVideo.isCompleted)}
-                className={`group px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
-                  currentVideo.isCompleted
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-400'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-700 dark:hover:text-green-400'
-                }`}
-              >
-                {currentVideo.isCompleted ? (
-                  <>
-                    {/* Default state: Completo */}
-                    <svg className="w-4 h-4 group-hover:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="group-hover:hidden">Completo</span>
-                    
-                    {/* Hover state: Marcar pendiente */}
-                    <svg className="w-4 h-4 hidden group-hover:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="hidden group-hover:inline">Marcar pendiente</span>
-                  </>
-                ) : (
-                  <>
-                    {/* Default state: Pendiente */}
-                    <svg className="w-4 h-4 group-hover:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="group-hover:hidden">Pendiente</span>
-                    
-                    {/* Hover state: Marcar completo */}
-                    <svg className="w-4 h-4 hidden group-hover:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="hidden group-hover:inline">Marcar completo</span>
-                  </>
-                )}
-              </button>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 flex-shrink-0">
+                {/* Completed Toggle Button */}
+                <button
+                  onClick={() => toggleVideoCompletion(currentVideo.id, currentVideo.isCompleted)}
+                  className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
+                    currentVideo.isCompleted
+                      ? 'border-green-500 text-green-500 hover:border-green-600 hover:text-green-600'
+                      : 'border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-400 dark:hover:text-gray-500'
+                  }`}
+                  title={currentVideo.isCompleted ? 'Marcar como pendiente' : 'Marcar como completo'}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </button>
+
+                {/* Favorite Toggle Button */}
+                <button
+                  onClick={() => toggleFavorite(currentVideo.id)}
+                  className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
+                    favorites.has(currentVideo.id)
+                      ? 'border-[#1472FF] text-[#1472FF] hover:border-[#0E5FCC] hover:text-[#0E5FCC]'
+                      : 'border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-400 dark:hover:text-gray-500'
+                  }`}
+                  title={favorites.has(currentVideo.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
