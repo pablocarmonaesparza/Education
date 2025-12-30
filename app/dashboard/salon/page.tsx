@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -24,6 +24,8 @@ function SalonContent() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAutoCompleted, setHasAutoCompleted] = useState<Set<string>>(new Set());
+  const videoRef = useRef<HTMLVideoElement>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -152,6 +154,71 @@ function SalonContent() {
     }
   };
 
+  // Toggle video completion status
+  const toggleVideoCompletion = async (videoId: string, currentlyCompleted: boolean) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    if (currentlyCompleted) {
+      // Mark as pending
+      await supabase
+        .from('video_progress')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('video_id', videoId);
+    } else {
+      // Mark as completed
+      await supabase
+        .from('video_progress')
+        .upsert({
+          user_id: user.id,
+          video_id: videoId,
+          completed: true,
+          progress_percent: 100,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,video_id' });
+    }
+
+    // Update local state
+    setVideos(prevVideos => {
+      const updated = prevVideos.map(v => {
+        if (v.id === videoId) {
+          return { ...v, isCompleted: !currentlyCompleted };
+        }
+        return v;
+      });
+      
+      // Recalculate isCurrent
+      let foundCurrent = false;
+      return updated.map(v => {
+        if (!v.isCompleted && !foundCurrent) {
+          foundCurrent = true;
+          return { ...v, isCurrent: true };
+        }
+        return { ...v, isCurrent: false };
+      });
+    });
+
+    // Update currentVideo if it's the one being toggled
+    if (currentVideo?.id === videoId) {
+      setCurrentVideo(prev => prev ? { ...prev, isCompleted: !currentlyCompleted } : null);
+    }
+  };
+
+  // Handle video time update for auto-complete at 90%
+  const handleTimeUpdate = () => {
+    if (!videoRef.current || !currentVideo) return;
+    
+    const video = videoRef.current;
+    const progress = (video.currentTime / video.duration) * 100;
+    
+    // Auto-complete at 90% if not already completed
+    if (progress >= 90 && !currentVideo.isCompleted && !hasAutoCompleted.has(currentVideo.id)) {
+      setHasAutoCompleted(prev => new Set(prev).add(currentVideo.id));
+      toggleVideoCompletion(currentVideo.id, false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="h-[calc(100vh-10rem)] md:h-[calc(100vh-11rem)] bg-transparent flex items-center justify-center">
@@ -184,11 +251,13 @@ function SalonContent() {
           <div className="relative bg-gray-900 rounded-2xl overflow-hidden aspect-video">
             {currentVideo.videoUrl ? (
               <video
+                ref={videoRef}
                 key={currentVideo.id}
                 className="w-full h-full object-contain"
                 controls
                 autoPlay
                 src={currentVideo.videoUrl}
+                onTimeUpdate={handleTimeUpdate}
               />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#1472FF] to-[#5BA0FF]">
@@ -211,8 +280,35 @@ function SalonContent() {
                 )}
               </div>
               
-              {/* Navigation Buttons */}
+              {/* Action Buttons */}
               <div className="flex items-center gap-2 flex-shrink-0">
+                {/* Complete/Uncomplete Button */}
+                <button
+                  onClick={() => toggleVideoCompletion(currentVideo.id, currentVideo.isCompleted)}
+                  className={`px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 ${
+                    currentVideo.isCompleted
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {currentVideo.isCompleted ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Completado
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Marcar completado
+                    </>
+                  )}
+                </button>
+
+                {/* Navigation Buttons */}
                 <button
                   onClick={handlePrevious}
                   disabled={currentVideo.order === 0}
