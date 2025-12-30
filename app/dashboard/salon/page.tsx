@@ -387,19 +387,19 @@ function SalonContent() {
                       }`}
                     >
                       {/* Status Icon */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
                         video.isCompleted
-                          ? 'bg-green-500'
+                          ? 'border-green-500 bg-transparent'
                           : currentVideo.id === video.id
-                          ? 'bg-gradient-to-br from-[#1472FF] to-[#5BA0FF]'
-                          : 'bg-gray-200 dark:bg-gray-700'
+                          ? 'border-[#1472FF] bg-transparent'
+                          : 'border-gray-300 dark:border-gray-600 bg-transparent'
                       }`}>
                         {video.isCompleted ? (
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                         ) : currentVideo.id === video.id ? (
-                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 text-[#1472FF]" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         ) : (
