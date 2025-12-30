@@ -280,6 +280,17 @@ export default function DashboardPage() {
                     </svg>
                   )}
                   
+                  {/* Status badge - glass style */}
+                  <span className={`absolute top-2 right-2 px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-md ${
+                    video.isCompleted
+                      ? 'bg-white/20 text-white'
+                      : video.isCurrent
+                      ? 'bg-white/20 text-white'
+                      : 'bg-black/20 text-white dark:bg-white/20'
+                  }`}>
+                    {video.isCompleted ? 'Completado' : video.isCurrent ? 'En progreso' : 'Pendiente'}
+                  </span>
+                  
                   {/* Duration badge */}
                   <span className={`absolute bottom-2 right-2 px-2 py-0.5 rounded text-xs font-medium ${
                     video.isCurrent || video.isCompleted
@@ -305,16 +316,6 @@ export default function DashboardPage() {
                   }`}>
                     {video.title}
                   </h3>
-                  
-                  {/* Progress indicator */}
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      video.isCompleted ? 'bg-green-500' : video.isCurrent ? 'bg-[#1472FF]' : 'bg-gray-300 dark:bg-gray-600'
-                    }`} />
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {video.isCompleted ? 'Completado' : video.isCurrent ? 'En progreso' : 'Pendiente'}
-                    </span>
-                  </div>
                 </div>
               </div>
             ))}
