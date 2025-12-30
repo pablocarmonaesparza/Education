@@ -312,11 +312,11 @@ function SalonContent() {
               </div>
               
               {/* Action Buttons - expand left on hover */}
-              <div className="flex items-center flex-shrink-0">
+              <div className="flex items-center gap-3 flex-shrink-0">
                 {/* Completed Toggle Button */}
                 <button
                   onClick={() => toggleVideoCompletion(currentVideo.id, currentVideo.isCompleted)}
-                  className={`group h-10 rounded-full flex items-center transition-all duration-300 ease-out overflow-hidden px-2.5 hover:pl-4 hover:pr-3 ${
+                  className={`group w-10 h-10 hover:w-auto rounded-full flex items-center justify-center transition-all duration-300 ease-out overflow-hidden hover:pl-4 hover:pr-3 ${
                     currentVideo.isCompleted
                       ? 'bg-green-500 text-white hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-green-500'
                       : 'border-2 border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-green-500 hover:text-green-500'
@@ -333,7 +333,7 @@ function SalonContent() {
                 {/* Favorite Toggle Button */}
                 <button
                   onClick={() => toggleFavorite(currentVideo.id)}
-                  className={`group h-10 rounded-full flex items-center transition-all duration-300 ease-out overflow-hidden px-2.5 hover:pl-4 hover:pr-3 ml-1 ${
+                  className={`group w-10 h-10 hover:w-auto rounded-full flex items-center justify-center transition-all duration-300 ease-out overflow-hidden hover:pl-4 hover:pr-3 ${
                     favorites.has(currentVideo.id)
                       ? 'bg-[#1472FF] text-white hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-[#1472FF]'
                       : 'border-2 border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-[#1472FF] hover:text-[#1472FF]'
