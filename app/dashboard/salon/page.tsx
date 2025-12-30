@@ -316,10 +316,10 @@ function SalonContent() {
                 {/* Completed Toggle Button */}
                 <button
                   onClick={() => toggleVideoCompletion(currentVideo.id, currentVideo.isCompleted)}
-                  className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                     currentVideo.isCompleted
-                      ? 'border-green-500 text-green-500 hover:border-green-600 hover:text-green-600'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-400 dark:hover:text-gray-500'
+                      ? 'bg-green-500 text-white hover:bg-green-600'
+                      : 'border-2 border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-400 dark:hover:text-gray-500'
                   }`}
                   title={currentVideo.isCompleted ? 'Marcar como pendiente' : 'Marcar como completo'}
                 >
@@ -331,10 +331,10 @@ function SalonContent() {
                 {/* Favorite Toggle Button */}
                 <button
                   onClick={() => toggleFavorite(currentVideo.id)}
-                  className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                     favorites.has(currentVideo.id)
-                      ? 'border-[#1472FF] text-[#1472FF] hover:border-[#0E5FCC] hover:text-[#0E5FCC]'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-400 dark:hover:text-gray-500'
+                      ? 'bg-[#1472FF] text-white hover:bg-[#0E5FCC]'
+                      : 'border-2 border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-400 dark:hover:text-gray-500'
                   }`}
                   title={favorites.has(currentVideo.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
@@ -393,23 +393,23 @@ function SalonContent() {
                       }`}
                     >
                       {/* Status Icon */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                         video.isCompleted
-                          ? 'border-green-500 bg-transparent'
+                          ? 'bg-green-500 text-white'
                           : currentVideo.id === video.id
-                          ? 'border-[#1472FF] bg-transparent'
-                          : 'border-gray-300 dark:border-gray-600 bg-transparent'
+                          ? 'bg-[#1472FF] text-white'
+                          : 'border-2 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400'
                       }`}>
                         {video.isCompleted ? (
-                          <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                         ) : currentVideo.id === video.id ? (
-                          <svg className="w-4 h-4 text-[#1472FF]" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         ) : (
-                          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{video.order + 1}</span>
+                          <span className="text-xs font-medium">{video.order + 1}</span>
                         )}
                       </div>
                       
