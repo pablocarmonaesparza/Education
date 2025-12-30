@@ -318,8 +318,8 @@ function SalonContent() {
                   onClick={() => toggleVideoCompletion(currentVideo.id, currentVideo.isCompleted)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                     currentVideo.isCompleted
-                      ? 'bg-green-500 text-white hover:bg-green-600'
-                      : 'border-2 border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-400 dark:hover:text-gray-500'
+                      ? 'bg-green-500 text-white hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-green-500'
+                      : 'border-2 border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-green-500 hover:text-green-500'
                   }`}
                   title={currentVideo.isCompleted ? 'Marcar como pendiente' : 'Marcar como completo'}
                 >
@@ -333,8 +333,8 @@ function SalonContent() {
                   onClick={() => toggleFavorite(currentVideo.id)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                     favorites.has(currentVideo.id)
-                      ? 'bg-[#1472FF] text-white hover:bg-[#0E5FCC]'
-                      : 'border-2 border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-400 dark:hover:text-gray-500'
+                      ? 'bg-[#1472FF] text-white hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-[#1472FF]'
+                      : 'border-2 border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-600 hover:border-[#1472FF] hover:text-[#1472FF]'
                   }`}
                   title={favorites.has(currentVideo.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
