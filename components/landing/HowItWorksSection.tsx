@@ -6,20 +6,20 @@ import Image from "next/image";
 
 const steps = [
   {
-    title: "Describe tu idea",
-    description: "Escribe tu idea de proyecto en tus propias palabras. Puede ser cualquier cosa relacionada con automatización, IA o desarrollo de software.",
+    title: "El problema",
+    description: "Los cursos genéricos te hacen recorrer caminos interminables. Pasas horas viendo contenido que no aplica a lo que realmente quieres construir.",
     imageLight: "/images/how-it-works-1-light.png",
     imageDark: "/images/how-it-works-1-dark.png",
   },
   {
-    title: "Generamos tu curso",
-    description: "Nuestra IA analiza tu idea y crea un plan de estudios personalizado con videos seleccionados específicamente para tu proyecto.",
+    title: "Cuéntanos tu idea",
+    description: "Describe el proyecto que quieres crear. Nuestra IA analiza miles de videos y selecciona únicamente los que necesitas para tu objetivo específico.",
     imageLight: "/images/how-it-works-2-light.png",
     imageDark: "/images/how-it-works-2-dark.png",
   },
   {
-    title: "Aprende y construye",
-    description: "Accede a videos cortos y prácticos que te guiarán paso a paso. Aprende mientras construyes tu proyecto real.",
+    title: "Tu camino directo",
+    description: "Recibe un curso personalizado con videos ordenados paso a paso. Sin rodeos, sin relleno. Solo lo esencial para construir tu proyecto.",
     imageLight: "/images/how-it-works-3-light.png",
     imageDark: "/images/how-it-works-3-dark.png",
   },
