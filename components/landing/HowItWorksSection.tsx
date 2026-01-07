@@ -8,8 +8,8 @@ const steps = [
   {
     title: "El problema",
     description: "Los cursos genéricos te hacen recorrer caminos interminables. Pasas horas viendo contenido que no aplica a lo que realmente quieres construir.",
-    imageLight: "/images/how-it-works-1-light.png",
-    imageDark: "/images/how-it-works-1-dark.png",
+    imageLight: "/images/how-it-works-1-dark.png",
+    imageDark: "/images/how-it-works-1-light.png",
   },
   {
     title: "Cuéntanos tu idea",
