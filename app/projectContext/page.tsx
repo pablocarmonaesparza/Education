@@ -271,47 +271,30 @@ export default function ProjectContextPage() {
       <main className="flex-1 flex flex-col items-center justify-center px-6 pt-20 pb-12">
         <div className="w-full max-w-2xl mx-auto">
           {/* Section Name - Always visible at top */}
-          {currentIndex > 0 && (
+          <AnimatePresence mode="wait">
             <motion.div
               key={currentSection.id}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-8"
+              exit={{ opacity: 0, y: 10 }}
+              className="text-center mb-4"
             >
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                 {currentSection.name}
               </h2>
             </motion.div>
-          )}
+          </AnimatePresence>
 
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="text-center mb-6"
-          >
-            {currentIndex === 0 ? (
-              <>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-                  Personaliza tu curso
-                </h1>
-                <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">
-                  {allQuestions.length} preguntas rápidas para entender tu nivel.
-                </p>
-              </>
-            ) : (
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-sm text-gray-400 dark:text-gray-500">
-                  {currentIndex + 1} de {allQuestions.length}
-                </span>
-                <span className="text-sm text-gray-300 dark:text-gray-600">•</span>
-                <span className="text-sm text-gray-400 dark:text-gray-500">
-                  ~{Math.ceil((allQuestions.length - currentIndex) * 0.2)} min
-                </span>
-              </div>
-            )}
-          </motion.div>
+          {/* Progress counter */}
+          <div className="flex items-center justify-center gap-2 mb-8">
+            <span className="text-sm text-gray-400 dark:text-gray-500">
+              {currentIndex + 1} de {allQuestions.length}
+            </span>
+            <span className="text-sm text-gray-300 dark:text-gray-600">•</span>
+            <span className="text-sm text-gray-400 dark:text-gray-500">
+              ~{Math.ceil((allQuestions.length - currentIndex) * 0.2)} min
+            </span>
+          </div>
 
           {/* Question */}
           <AnimatePresence mode="wait">
