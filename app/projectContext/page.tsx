@@ -5,121 +5,184 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import OnboardingNavbar from '@/components/onboarding/OnboardingNavbar';
 
-// 20 questions with custom intermediate labels
-const questions = [
-  // AI & LLMs
+// Sections with their questions
+const sections = [
   {
-    id: 'ai_familiarity',
-    question: '¿Qué tan familiarizado estás con herramientas de AI como ChatGPT o Claude?',
-    labels: ['Nunca las he usado', 'Uso ocasional', 'Uso semanal', 'Uso frecuente', 'Uso diario'],
+    id: 'ai',
+    name: 'AI & LLMs',
+    questions: [
+      {
+        id: 'ai_familiarity',
+        question: '¿Qué tan familiarizado estás con herramientas de AI como ChatGPT o Claude?',
+        labels: ['Nunca las he usado', 'Uso ocasional', 'Uso semanal', 'Uso frecuente', 'Uso diario'],
+      },
+      {
+        id: 'prompting',
+        question: '¿Qué tan avanzadas son tus técnicas de prompting?',
+        labels: ['Solo prompts simples', 'Doy contexto básico', 'Uso ejemplos y formatos', 'System prompts', 'Chains y meta-prompts'],
+      },
+      {
+        id: 'ai_features',
+        question: '¿Qué features de AI has utilizado?',
+        labels: ['Solo chat básico', 'Análisis de docs', 'Custom GPTs/Projects', 'APIs de AI', 'Integraciones avanzadas'],
+      },
+      {
+        id: 'rag_knowledge',
+        question: '¿Has trabajado con RAG (Retrieval Augmented Generation)?',
+        labels: ['No sé qué es', 'Conozco el concepto', 'He subido docs a GPTs', 'He usado embeddings', 'Implemento RAG completo'],
+      },
+    ],
   },
-  {
-    id: 'prompting',
-    question: '¿Qué tan avanzadas son tus técnicas de prompting?',
-    labels: ['Solo prompts simples', 'Doy contexto básico', 'Uso ejemplos y formatos', 'System prompts', 'Chains y meta-prompts'],
-  },
-  {
-    id: 'ai_features',
-    question: '¿Qué features de AI has utilizado?',
-    labels: ['Solo chat básico', 'Análisis de docs', 'Custom GPTs/Projects', 'APIs de AI', 'Integraciones avanzadas'],
-  },
-  {
-    id: 'rag_knowledge',
-    question: '¿Has trabajado con RAG (Retrieval Augmented Generation)?',
-    labels: ['No sé qué es', 'Conozco el concepto', 'He subido docs a GPTs', 'He usado embeddings', 'Implemento RAG completo'],
-  },
-  // Automation
   {
     id: 'automation',
-    question: '¿Has creado automatizaciones con Zapier, Make o n8n?',
-    labels: ['Nunca', 'He probado algo', 'Tengo 1-2 activas', 'Varias en producción', 'Es mi día a día'],
+    name: 'Automatización',
+    questions: [
+      {
+        id: 'automation',
+        question: '¿Has creado automatizaciones con Zapier, Make o n8n?',
+        labels: ['Nunca', 'He probado algo', 'Tengo 1-2 activas', 'Varias en producción', 'Es mi día a día'],
+      },
+      {
+        id: 'automation_complexity',
+        question: '¿Qué tan complejas son tus automatizaciones?',
+        labels: ['Nunca he hecho', 'Conexiones simples', 'Flujos multi-paso', 'Condicionales y errores', 'APIs y código custom'],
+      },
+      {
+        id: 'automation_ai',
+        question: '¿Has integrado AI dentro de tus automatizaciones?',
+        labels: ['Nunca', 'Lo he intentado', 'Tengo 1-2 flujos', 'Varios flujos con AI', 'AI es central'],
+      },
+    ],
   },
-  {
-    id: 'automation_complexity',
-    question: '¿Qué tan complejas son tus automatizaciones?',
-    labels: ['Nunca he hecho', 'Conexiones simples', 'Flujos multi-paso', 'Condicionales y errores', 'APIs y código custom'],
-  },
-  {
-    id: 'automation_ai',
-    question: '¿Has integrado AI dentro de tus automatizaciones?',
-    labels: ['Nunca', 'Lo he intentado', 'Tengo 1-2 flujos', 'Varios flujos con AI', 'AI es central'],
-  },
-  // Coding
   {
     id: 'coding',
-    question: '¿Cuál es tu nivel de programación?',
-    labels: ['No sé programar', 'Modifico código existente', 'Scripts básicos', 'Programo regularmente', 'Desarrollo profesional'],
+    name: 'Programación',
+    questions: [
+      {
+        id: 'coding',
+        question: '¿Cuál es tu nivel de programación?',
+        labels: ['No sé programar', 'Modifico código existente', 'Scripts básicos', 'Programo regularmente', 'Desarrollo profesional'],
+      },
+      {
+        id: 'ai_coding_tools',
+        question: '¿Has usado herramientas de AI para programar?',
+        labels: ['Nunca', 'Las he probado', 'Uso ChatGPT para código', 'Uso Copilot', 'Uso Cursor/Claude Code'],
+      },
+      {
+        id: 'vibe_coding',
+        question: '¿Has usado herramientas que generan apps desde prompts (v0, Bolt, Lovable)?',
+        labels: ['No sé qué son', 'Las conozco', 'He generado prototipos', 'Proyectos funcionales', 'Apps en producción'],
+      },
+    ],
   },
-  {
-    id: 'ai_coding_tools',
-    question: '¿Has usado herramientas de AI para programar?',
-    labels: ['Nunca', 'Las he probado', 'Uso ChatGPT para código', 'Uso Copilot', 'Uso Cursor/Claude Code'],
-  },
-  {
-    id: 'vibe_coding',
-    question: '¿Has usado herramientas que generan apps desde prompts (v0, Bolt, Lovable)?',
-    labels: ['No sé qué son', 'Las conozco', 'He generado prototipos', 'Proyectos funcionales', 'Apps en producción'],
-  },
-  // APIs
   {
     id: 'apis',
-    question: '¿Has trabajado con APIs?',
-    labels: ['No sé qué es', 'Entiendo el concepto', 'He usado Postman', 'Conecto APIs regularmente', 'Desarrollo con APIs'],
+    name: 'APIs',
+    questions: [
+      {
+        id: 'apis',
+        question: '¿Has trabajado con APIs?',
+        labels: ['No sé qué es', 'Entiendo el concepto', 'He usado Postman', 'Conecto APIs regularmente', 'Desarrollo con APIs'],
+      },
+      {
+        id: 'api_types',
+        question: '¿Con qué tipos de APIs has trabajado?',
+        labels: ['Ninguna', 'Productividad (Sheets)', 'Comunicación (Slack)', 'AI (OpenAI)', 'Pagos/CRMs'],
+      },
+      {
+        id: 'webhooks',
+        question: '¿Has trabajado con webhooks?',
+        labels: ['No sé qué son', 'Entiendo el concepto', 'He configurado algunos', 'Los uso regularmente', 'Diseño sistemas con webhooks'],
+      },
+    ],
   },
   {
-    id: 'api_types',
-    question: '¿Con qué tipos de APIs has trabajado?',
-    labels: ['Ninguna', 'Productividad (Sheets)', 'Comunicación (Slack)', 'AI (OpenAI)', 'Pagos/CRMs'],
+    id: 'data',
+    name: 'Datos',
+    questions: [
+      {
+        id: 'data_comfort',
+        question: '¿Qué tan cómodo te sientes trabajando con datos?',
+        labels: ['Me intimida', 'Hojas de cálculo básicas', 'Fórmulas y filtros', 'Análisis y reportes', 'Muy cómodo'],
+      },
+      {
+        id: 'databases',
+        question: '¿Has trabajado con bases de datos?',
+        labels: ['Nunca', 'Airtable/Notion', 'SQL básico', 'Queries complejos', 'Diseño de schemas'],
+      },
+      {
+        id: 'sql_level',
+        question: '¿Cuál es tu nivel de SQL?',
+        labels: ['No sé SQL', 'SELECT básico', 'WHERE y ORDER BY', 'JOINs y GROUP BY', 'CTEs y window functions'],
+      },
+    ],
   },
   {
-    id: 'webhooks',
-    question: '¿Has trabajado con webhooks?',
-    labels: ['No sé qué son', 'Entiendo el concepto', 'He configurado algunos', 'Los uso regularmente', 'Diseño sistemas con webhooks'],
-  },
-  // Data
-  {
-    id: 'data_comfort',
-    question: '¿Qué tan cómodo te sientes trabajando con datos?',
-    labels: ['Me intimida', 'Hojas de cálculo básicas', 'Fórmulas y filtros', 'Análisis y reportes', 'Muy cómodo'],
-  },
-  {
-    id: 'databases',
-    question: '¿Has trabajado con bases de datos?',
-    labels: ['Nunca', 'Airtable/Notion', 'SQL básico', 'Queries complejos', 'Diseño de schemas'],
-  },
-  {
-    id: 'sql_level',
-    question: '¿Cuál es tu nivel de SQL?',
-    labels: ['No sé SQL', 'SELECT básico', 'WHERE y ORDER BY', 'JOINs y GROUP BY', 'CTEs y window functions'],
-  },
-  // MCP & Agents
-  {
-    id: 'mcp',
-    question: '¿Has trabajado con MCP (Model Context Protocol)?',
-    labels: ['No sé qué es', 'He escuchado', 'He configurado servers', 'Uso varios servers', 'Creo MCP servers'],
+    id: 'advanced',
+    name: 'MCP & Agentes',
+    questions: [
+      {
+        id: 'mcp',
+        question: '¿Has trabajado con MCP (Model Context Protocol)?',
+        labels: ['No sé qué es', 'He escuchado', 'He configurado servers', 'Uso varios servers', 'Creo MCP servers'],
+      },
+      {
+        id: 'agents',
+        question: '¿Has creado o usado agentes de AI?',
+        labels: ['No sé qué son', 'Conozco el concepto', 'He probado algunos', 'Los uso regularmente', 'Diseño agentes'],
+      },
+    ],
   },
   {
-    id: 'agents',
-    question: '¿Has creado o usado agentes de AI?',
-    labels: ['No sé qué son', 'Conozco el concepto', 'He probado algunos', 'Los uso regularmente', 'Diseño agentes'],
-  },
-  // Context
-  {
-    id: 'project_stage',
-    question: '¿En qué etapa está tu proyecto?',
-    labels: ['Solo una idea', 'Prototipo básico', 'MVP funcional', 'Usuarios activos', 'Genera ingresos'],
-  },
-  {
-    id: 'time_available',
-    question: '¿Cuántas horas semanales puedes dedicar a aprender?',
-    labels: ['1-3 horas', '3-5 horas', '5-10 horas', '10-15 horas', '+15 horas'],
+    id: 'context',
+    name: 'Tu Proyecto',
+    questions: [
+      {
+        id: 'project_stage',
+        question: '¿En qué etapa está tu proyecto?',
+        labels: ['Solo una idea', 'Prototipo básico', 'MVP funcional', 'Usuarios activos', 'Genera ingresos'],
+      },
+      {
+        id: 'time_available',
+        question: '¿Cuántas horas semanales puedes dedicar a aprender?',
+        labels: ['1-3 horas', '3-5 horas', '5-10 horas', '10-15 horas', '+15 horas'],
+      },
+    ],
   },
 ];
+
+// Flatten questions for easy indexing
+const allQuestions = sections.flatMap(section => 
+  section.questions.map(q => ({ ...q, sectionId: section.id, sectionName: section.name }))
+);
+
+// Helper to get section index from question index
+const getSectionIndex = (questionIndex: number): number => {
+  let count = 0;
+  for (let i = 0; i < sections.length; i++) {
+    count += sections[i].questions.length;
+    if (questionIndex < count) return i;
+  }
+  return sections.length - 1;
+};
+
+// Helper to get question index within its section
+const getQuestionIndexInSection = (questionIndex: number): number => {
+  let count = 0;
+  for (let i = 0; i < sections.length; i++) {
+    if (questionIndex < count + sections[i].questions.length) {
+      return questionIndex - count;
+    }
+    count += sections[i].questions.length;
+  }
+  return 0;
+};
 
 interface QuestionResponse {
   question: string;
   value: number;
   label: string;
+  section: string;
 }
 
 export default function ProjectContextPage() {
@@ -136,7 +199,10 @@ export default function ProjectContextPage() {
     }
   }, [router]);
 
-  const currentQuestion = questions[currentIndex];
+  const currentQuestion = allQuestions[currentIndex];
+  const currentSectionIndex = getSectionIndex(currentIndex);
+  const currentSection = sections[currentSectionIndex];
+  const questionIndexInSection = getQuestionIndexInSection(currentIndex);
   const currentValue = answers[currentQuestion.id] ?? 3; // Default to middle
 
   const handleSliderChange = (value: number) => {
@@ -149,7 +215,7 @@ export default function ProjectContextPage() {
       setAnswers(prev => ({ ...prev, [currentQuestion.id]: 3 }));
     }
 
-    if (currentIndex < questions.length - 1) {
+    if (currentIndex < allQuestions.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else {
       finishQuestionnaire();
@@ -168,12 +234,13 @@ export default function ProjectContextPage() {
     // Build responses with full context
     const responses: Record<string, QuestionResponse> = {};
     
-    questions.forEach(q => {
+    allQuestions.forEach(q => {
       const value = answers[q.id] ?? 3;
       responses[q.id] = {
         question: q.question,
         value: value,
         label: q.labels[value - 1],
+        section: q.sectionName,
       };
     });
 
@@ -185,8 +252,17 @@ export default function ProjectContextPage() {
     router.push('/courseCreation');
   };
 
-  const progress = ((currentIndex + 1) / questions.length) * 100;
+  const progress = ((currentIndex + 1) / allQuestions.length) * 100;
   const currentLabel = currentQuestion.labels[currentValue - 1];
+  
+  // Calculate starting index for each section
+  const getSectionStartIndex = (sectionIdx: number): number => {
+    let start = 0;
+    for (let i = 0; i < sectionIdx; i++) {
+      start += sections[i].questions.length;
+    }
+    return start;
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
@@ -207,18 +283,23 @@ export default function ProjectContextPage() {
                   Personaliza tu curso
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">
-                  {questions.length} preguntas rápidas para entender tu nivel.
+                  {allQuestions.length} preguntas rápidas para entender tu nivel.
                 </p>
               </>
             ) : (
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-sm text-[#1472FF] font-medium">
-                  {currentIndex + 1} de {questions.length}
+              <div className="flex flex-col items-center gap-1 mb-2">
+                <span className="text-xs font-semibold text-[#1472FF] uppercase tracking-wider">
+                  {currentSection.name}
                 </span>
-                <span className="text-sm text-gray-300 dark:text-gray-600">•</span>
-                <span className="text-sm text-gray-400 dark:text-gray-500">
-                  ~{Math.ceil((questions.length - currentIndex) * 0.2)} min restantes
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {currentIndex + 1} de {allQuestions.length}
+                  </span>
+                  <span className="text-sm text-gray-300 dark:text-gray-600">•</span>
+                  <span className="text-sm text-gray-400 dark:text-gray-500">
+                    ~{Math.ceil((allQuestions.length - currentIndex) * 0.2)} min
+                  </span>
+                </div>
               </div>
             )}
           </motion.div>
@@ -341,28 +422,61 @@ export default function ProjectContextPage() {
               whileTap={{ scale: 0.98 }}
               className="px-6 py-3 rounded-full font-semibold text-sm text-white bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] hover:from-[#0E5FCC] hover:to-[#1472FF] transition-all duration-300 flex items-center gap-2"
             >
-              {currentIndex === questions.length - 1 ? 'Crear mi curso' : 'Siguiente'}
+              {currentIndex === allQuestions.length - 1 ? 'Crear mi curso' : 'Siguiente'}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </motion.button>
           </div>
 
-          {/* Question dots indicator */}
-          <div className="flex justify-center gap-1.5 mt-8 flex-wrap max-w-xs mx-auto">
-            {questions.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  index === currentIndex
-                    ? 'w-6 bg-gradient-to-r from-[#1472FF] to-[#5BA0FF]'
-                    : answers[questions[index].id] !== undefined
-                      ? 'w-1.5 bg-[#1472FF]'
-                      : 'w-1.5 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
-                }`}
-              />
-            ))}
+          {/* Section-based dots indicator */}
+          <div className="flex justify-center items-center gap-3 mt-8">
+            {sections.map((section, sectionIdx) => {
+              const isCurrentSection = sectionIdx === currentSectionIndex;
+              const sectionStartIdx = getSectionStartIndex(sectionIdx);
+              const sectionAnswered = section.questions.every(q => answers[q.id] !== undefined);
+              const sectionPartial = section.questions.some(q => answers[q.id] !== undefined);
+              
+              return (
+                <div key={section.id} className="flex items-center gap-1">
+                  {isCurrentSection ? (
+                    // Expanded view for current section
+                    section.questions.map((q, qIdx) => {
+                      const globalIdx = sectionStartIdx + qIdx;
+                      const isCurrentQuestion = globalIdx === currentIndex;
+                      const isAnswered = answers[q.id] !== undefined;
+                      
+                      return (
+                        <button
+                          key={q.id}
+                          onClick={() => setCurrentIndex(globalIdx)}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            isCurrentQuestion
+                              ? 'w-6 bg-gradient-to-r from-[#1472FF] to-[#5BA0FF]'
+                              : isAnswered
+                                ? 'w-2 bg-[#1472FF]'
+                                : 'w-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400'
+                          }`}
+                        />
+                      );
+                    })
+                  ) : (
+                    // Collapsed view for other sections
+                    <button
+                      onClick={() => setCurrentIndex(sectionStartIdx)}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        sectionAnswered
+                          ? 'w-3 bg-[#1472FF]'
+                          : sectionPartial
+                            ? 'w-3 bg-[#1472FF]/50'
+                            : 'w-3 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400'
+                      }`}
+                      title={section.name}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Skip link */}
