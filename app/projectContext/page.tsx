@@ -459,15 +459,6 @@ export default function ProjectContextPage() {
             })}
           </div>
 
-          {/* Skip link */}
-          <div className="text-center mt-6">
-            <button
-              onClick={handleSkip}
-              className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-            >
-              Saltar este paso
-            </button>
-          </div>
         </div>
       </main>
     </div>
