@@ -102,8 +102,8 @@ const sections = [
     questions: [
       {
         id: 'data_comfort',
-        question: '¿Qué tan cómodo te sientes trabajando con datos?',
-        labels: ['Me intimida', 'Hojas de cálculo básicas', 'Fórmulas y filtros', 'Análisis y reportes', 'Muy cómodo'],
+        question: '¿Con qué frecuencia trabajas con datos (tablas, reportes, métricas)?',
+        labels: ['Casi nunca', 'Ocasionalmente', 'Varias veces al mes', 'Semanalmente', 'Es parte de mi día a día'],
       },
       {
         id: 'databases',
@@ -111,9 +111,9 @@ const sections = [
         labels: ['Nunca', 'Airtable/Notion', 'SQL básico', 'Queries complejos', 'Diseño de schemas'],
       },
       {
-        id: 'sql_level',
-        question: '¿Cuál es tu nivel de SQL?',
-        labels: ['No sé SQL', 'SELECT básico', 'WHERE y ORDER BY', 'JOINs y GROUP BY', 'CTEs y window functions'],
+        id: 'data_visualization',
+        question: '¿Has creado dashboards o visualizaciones de datos?',
+        labels: ['Nunca', 'Gráficos básicos', 'Dashboards simples', 'Dashboards interactivos', 'Sistemas de reporteo completos'],
       },
     ],
   },
@@ -130,22 +130,6 @@ const sections = [
         id: 'agents',
         question: '¿Has creado o usado agentes de AI?',
         labels: ['No sé qué son', 'Conozco el concepto', 'He probado algunos', 'Los uso regularmente', 'Diseño agentes'],
-      },
-    ],
-  },
-  {
-    id: 'context',
-    name: 'Tu Proyecto',
-    questions: [
-      {
-        id: 'project_stage',
-        question: '¿En qué etapa está tu proyecto?',
-        labels: ['Solo una idea', 'Prototipo básico', 'MVP funcional', 'Usuarios activos', 'Genera ingresos'],
-      },
-      {
-        id: 'time_available',
-        question: '¿Cuántas horas semanales puedes dedicar a aprender?',
-        labels: ['1-3 horas', '3-5 horas', '5-10 horas', '10-15 horas', '+15 horas'],
       },
     ],
   },
