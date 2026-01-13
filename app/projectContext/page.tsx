@@ -275,7 +275,7 @@ export default function ProjectContextPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="text-center mb-8"
+            className="text-center mb-6"
           >
             {currentIndex === 0 ? (
               <>
@@ -287,12 +287,12 @@ export default function ProjectContextPage() {
                 </p>
               </>
             ) : (
-              <div className="flex flex-col items-center gap-1 mb-2">
-                <span className="text-xs font-semibold text-[#1472FF] uppercase tracking-wider">
+              <div className="flex flex-col items-center gap-2">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                   {currentSection.name}
-                </span>
+                </h2>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                  <span className="text-sm text-gray-400 dark:text-gray-500">
                     {currentIndex + 1} de {allQuestions.length}
                   </span>
                   <span className="text-sm text-gray-300 dark:text-gray-600">•</span>
@@ -303,18 +303,6 @@ export default function ProjectContextPage() {
               </div>
             )}
           </motion.div>
-
-          {/* Progress bar */}
-          <div className="mb-10">
-            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
-              <motion.div
-                className="bg-gradient-to-r from-[#1472FF] to-[#5BA0FF] h-1.5 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </div>
 
           {/* Question */}
           <AnimatePresence mode="wait">
