@@ -164,20 +164,25 @@ export default function RetosPage() {
     }
   };
 
-  const getTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-      'CONFIGURACIÓN': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-      'PROMPT': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      'AUTOMATIZACIÓN': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-      'CÓDIGO': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-      'TESTING': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-      'DEPLOY': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    };
-    return colors[type] || 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+  const getTypeColor = () => {
+    return 'bg-blue-50 text-[#1472FF] dark:bg-blue-950/50 dark:text-[#5BA0FF]';
   };
 
-  const getDifficultyStars = (difficulty: number) => {
-    return '★'.repeat(difficulty) + '☆'.repeat(5 - difficulty);
+  const getDifficultyDots = (difficulty: number) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div
+            key={i}
+            className={`w-2 h-2 rounded-full ${
+              i <= difficulty
+                ? 'bg-[#1472FF]'
+                : 'bg-gray-200 dark:bg-gray-700'
+            }`}
+          />
+        ))}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -274,7 +279,7 @@ export default function RetosPage() {
                   {/* Number/Check/Lock */}
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     isCompleted 
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-[#1472FF] text-white'
                       : isLocked
                         ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                         : isActive
@@ -308,7 +313,7 @@ export default function RetosPage() {
                       {exercise.title}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className={`text-xs px-1.5 py-0.5 rounded ${isLocked ? 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500' : getTypeColor(exercise.type)}`}>
+                      <span className={`text-xs px-1.5 py-0.5 rounded ${isLocked ? 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500' : getTypeColor()}`}>
                         {exercise.type}
                       </span>
                       <span className="text-xs text-gray-400">
@@ -330,16 +335,14 @@ export default function RetosPage() {
               <div className="flex-shrink-0 mb-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${getTypeColor(currentExercise.type)}`}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${getTypeColor()}`}>
                         {currentExercise.type}
                       </span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         Fase {currentExercise.phase}
                       </span>
-                      <span className="text-xs text-yellow-500">
-                        {getDifficultyStars(currentExercise.difficulty)}
-                      </span>
+                      {getDifficultyDots(currentExercise.difficulty)}
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                       {currentExercise.number}. {currentExercise.title}
@@ -354,8 +357,8 @@ export default function RetosPage() {
                       !currentExercise.isUnlocked && !currentExercise.isCompleted
                         ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                         : currentExercise.isCompleted
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-400'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-700 dark:hover:text-green-400'
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-[#1472FF] dark:text-[#5BA0FF] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-400'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-[#1472FF] dark:hover:text-[#5BA0FF]'
                     }`}
                   >
                     {!currentExercise.isUnlocked && !currentExercise.isCompleted ? (
@@ -401,9 +404,9 @@ export default function RetosPage() {
                   </div>
 
                   {/* Deliverable */}
-                  <div className="bg-gradient-to-br from-green-50 to-white dark:from-green-950/30 dark:to-gray-900 rounded-2xl p-6 border border-green-200 dark:border-green-900">
+                  <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-gray-900 rounded-2xl p-6 border border-blue-200 dark:border-blue-900">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-[#1472FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Entregable
@@ -417,18 +420,18 @@ export default function RetosPage() {
                   {currentExercise.videos_required && currentExercise.videos_required.length > 0 && (
                     <div className={`rounded-2xl p-6 border ${
                       currentExercise.missingVideos.length > 0
-                        ? 'bg-gradient-to-br from-orange-50 to-white dark:from-orange-950/20 dark:to-gray-900 border-orange-200 dark:border-orange-900'
+                        ? 'bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-700'
                         : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800'
                     }`}>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-                        <svg className={`w-5 h-5 ${currentExercise.missingVideos.length > 0 ? 'text-orange-500' : 'text-[#1472FF]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-[#1472FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Videos requeridos
                       </h3>
                       {currentExercise.missingVideos.length > 0 && (
-                        <p className="text-sm text-orange-600 dark:text-orange-400 mb-3">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
                           Completa los videos pendientes para desbloquear este reto
                         </p>
                       )}
@@ -441,8 +444,8 @@ export default function RetosPage() {
                               onClick={() => router.push(`/dashboard/salon?video=${videoNum}`)}
                               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
                                 isWatched
-                                  ? 'bg-green-50 dark:bg-green-950/50 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50'
-                                  : 'bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50'
+                                  ? 'bg-blue-50 dark:bg-blue-950/50 text-[#1472FF] dark:text-[#5BA0FF] hover:bg-blue-100 dark:hover:bg-blue-900/50'
+                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                               }`}
                             >
                               {isWatched ? (
@@ -466,7 +469,7 @@ export default function RetosPage() {
                   <div className="flex gap-4">
                     <div className="flex-1 bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-200 dark:border-gray-800">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
                           <svg className="w-5 h-5 text-[#1472FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
@@ -479,14 +482,14 @@ export default function RetosPage() {
                     </div>
                     <div className="flex-1 bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-200 dark:border-gray-800">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                          <svg className="w-5 h-5 text-[#1472FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 dark:text-gray-400">Dificultad</p>
-                          <p className="font-semibold text-yellow-500">{getDifficultyStars(currentExercise.difficulty)}</p>
+                          <div className="mt-1">{getDifficultyDots(currentExercise.difficulty)}</div>
                         </div>
                       </div>
                     </div>
