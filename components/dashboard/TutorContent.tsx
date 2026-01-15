@@ -17,13 +17,23 @@ interface Conversation {
   updated_at: string;
 }
 
+interface VideoInfo {
+  id: string;
+  title: string;
+  phase: string;
+  completed: boolean;
+}
+
 interface UserContext {
   userId: string;
   userName: string;
   userEmail: string;
   projectIdea: string;
+  intakeResponses: Record<string, any>;
   totalVideos: number;
   completedVideos: number;
+  currentVideo: VideoInfo | null;
+  completedVideosList: VideoInfo[];
   currentPhase: string;
   completedExercises: number;
   totalExercises: number;
@@ -34,20 +44,14 @@ export default function TutorContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
-  // User context
   const [userContext, setUserContext] = useState<UserContext | null>(null);
-  
-  // Conversations
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  
-  // Messages
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
-  // Load user context
   useEffect(() => {
     async function loadUserContext() {
       setIsLoading(true);
@@ -62,7 +66,7 @@ export default function TutorContent() {
         .eq('id', user.id)
         .single();
 
-      // Get intake responses (project idea and path)
+      // Get intake responses (ALL responses, not just project)
       const { data: intakeData } = await supabase
         .from('intake_responses')
         .select('responses, generated_path')
@@ -74,8 +78,9 @@ export default function TutorContent() {
       // Get video progress
       const { data: videoProgress } = await supabase
         .from('video_progress')
-        .select('video_id, completed')
-        .eq('user_id', user.id);
+        .select('video_id, completed, updated_at')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
 
       // Get exercise progress
       const { data: exerciseProgress } = await supabase
@@ -83,38 +88,57 @@ export default function TutorContent() {
         .select('exercise_id, completed')
         .eq('user_id', user.id);
 
-      // Calculate progress
-      const completedVideos = videoProgress?.filter(v => v.completed).length || 0;
-      
-      // Count total videos from generated_path
-      let totalVideos = 0;
+      // Build video info from generated_path
+      const allVideos: VideoInfo[] = [];
+      const completedVideosList: VideoInfo[] = [];
+      let currentVideo: VideoInfo | null = null;
       let currentPhase = '';
+      let totalVideos = 0;
+
       if (intakeData?.generated_path?.phases) {
-        intakeData.generated_path.phases.forEach((phase: any) => {
+        for (const phase of intakeData.generated_path.phases) {
           if (phase.videos) {
-            totalVideos += phase.videos.length;
+            for (const video of phase.videos) {
+              totalVideos++;
+              const videoId = `phase-${phase.order}-video-${video.order}`;
+              const isCompleted = videoProgress?.some(vp => vp.video_id === videoId && vp.completed) || false;
+              
+              const videoInfo: VideoInfo = {
+                id: videoId,
+                title: video.title,
+                phase: phase.title,
+                completed: isCompleted,
+              };
+              
+              allVideos.push(videoInfo);
+              
+              if (isCompleted) {
+                completedVideosList.push(videoInfo);
+              } else if (!currentVideo) {
+                // First incomplete video is the current one
+                currentVideo = videoInfo;
+                currentPhase = phase.title;
+              }
+            }
           }
-        });
-        // Find current phase (first incomplete)
-        const firstIncompletePhase = intakeData.generated_path.phases.find((phase: any) => {
-          const phaseVideos = phase.videos || [];
-          return phaseVideos.some((v: any) => {
-            const videoId = `phase-${phase.order}-video-${v.order}`;
-            return !videoProgress?.find(vp => vp.video_id === videoId && vp.completed);
-          });
-        });
-        currentPhase = firstIncompletePhase?.title || 'Completado';
+        }
       }
 
-      // Get user exercises count
+      // If all videos are complete
+      if (!currentVideo && allVideos.length > 0) {
+        currentPhase = 'Completado';
+      }
+
+      // Get exercises count
       const { data: userExercises } = await supabase
         .from('user_exercises')
         .select('id')
         .eq('user_id', user.id);
 
       const totalExercises = userExercises?.length || 0;
-      const completedExercises = exerciseProgress?.filter(e => e.completed).length || 0;
+      const completedExercisesCount = exerciseProgress?.filter(e => e.completed).length || 0;
 
+      // Extract project idea from responses
       const projectIdea = 
         intakeData?.responses?.project_idea ||
         intakeData?.responses?.project ||
@@ -126,11 +150,14 @@ export default function TutorContent() {
         userName: profile?.name || user.user_metadata?.name || 'Usuario',
         userEmail: profile?.email || user.email || '',
         projectIdea,
+        intakeResponses: intakeData?.responses || {},
         totalVideos,
-        completedVideos,
+        completedVideos: completedVideosList.length,
+        currentVideo,
+        completedVideosList,
         currentPhase,
         totalExercises,
-        completedExercises,
+        completedExercises: completedExercisesCount,
       });
 
       // Load conversations
@@ -150,7 +177,6 @@ export default function TutorContent() {
     loadUserContext();
   }, []);
 
-  // Load messages when conversation is selected
   useEffect(() => {
     async function loadMessages() {
       if (!selectedConversationId) {
@@ -170,16 +196,14 @@ export default function TutorContent() {
     loadMessages();
   }, [selectedConversationId]);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Create new conversation
   const createNewConversation = async () => {
     if (!userContext) return;
 
-    const { data: newConvo, error } = await supabase
+    const { data: newConvo } = await supabase
       .from('tutor_conversations')
       .insert({
         user_id: userContext.userId,
@@ -195,13 +219,11 @@ export default function TutorContent() {
     }
   };
 
-  // Send message
   const sendMessage = async () => {
     if (!inputMessage.trim() || !userContext || isSending) return;
 
     let conversationId = selectedConversationId;
 
-    // Create conversation if none selected
     if (!conversationId) {
       const { data: newConvo } = await supabase
         .from('tutor_conversations')
@@ -225,7 +247,6 @@ export default function TutorContent() {
     const userMessage = inputMessage;
     setInputMessage('');
 
-    // Add user message to UI immediately
     const tempUserMsg: Message = {
       id: 'temp-user-' + Date.now(),
       role: 'user',
@@ -234,7 +255,6 @@ export default function TutorContent() {
     };
     setMessages(prev => [...prev, tempUserMsg]);
 
-    // Save user message to DB
     const { data: savedUserMsg } = await supabase
       .from('tutor_messages')
       .insert({
@@ -245,24 +265,37 @@ export default function TutorContent() {
       .select()
       .single();
 
-    // Build context for AI
-    const courseContext = `
-CONTEXTO DEL ESTUDIANTE:
-- Nombre: ${userContext.userName}
-- Proyecto que quiere construir: ${userContext.projectIdea}
-- Fase actual del curso: ${userContext.currentPhase}
-- Progreso en videos: ${userContext.completedVideos}/${userContext.totalVideos} completados (${Math.round((userContext.completedVideos / Math.max(userContext.totalVideos, 1)) * 100)}%)
-- Progreso en retos: ${userContext.completedExercises}/${userContext.totalExercises} completados
+    // Build comprehensive context for AI
+    const completedVideosText = userContext.completedVideosList.length > 0
+      ? userContext.completedVideosList.map(v => `  - "${v.title}" (${v.phase})`).join('\n')
+      : '  Ninguno aún';
 
-INSTRUCCIONES ADICIONALES:
-- Personaliza tus respuestas usando el nombre del estudiante
-- Relaciona tus explicaciones con su proyecto específico cuando sea relevante
-- Si el estudiante está en las primeras fases, usa explicaciones más básicas
-- Si tiene buen avance, puedes ser más técnico
-- Motívalo mencionando su progreso cuando sea apropiado
+    const intakeResponsesText = Object.entries(userContext.intakeResponses)
+      .filter(([key]) => !['generated_path'].includes(key))
+      .map(([key, value]) => `  - ${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`)
+      .join('\n');
+
+    const courseContext = `
+INFORMACIÓN DEL ESTUDIANTE:
+- Nombre: ${userContext.userName}
+- Email: ${userContext.userEmail}
+
+RESPUESTAS DE REGISTRO (lo que dijo cuando se inscribió):
+${intakeResponsesText || '  No hay respuestas registradas'}
+
+PROYECTO QUE QUIERE CONSTRUIR:
+${userContext.projectIdea}
+
+PROGRESO ACTUAL:
+- Fase actual: ${userContext.currentPhase}
+- Video/clase actual: ${userContext.currentVideo ? `"${userContext.currentVideo.title}" en la fase "${userContext.currentVideo.phase}"` : 'Todos completados'}
+- Videos completados: ${userContext.completedVideos}/${userContext.totalVideos}
+- Retos completados: ${userContext.completedExercises}/${userContext.totalExercises}
+
+CLASES/VIDEOS YA COMPLETADOS:
+${completedVideosText}
     `.trim();
 
-    // Get conversation history for context
     const conversationHistory = messages.slice(-10).map(m => ({
       role: m.role,
       content: m.content,
@@ -281,7 +314,6 @@ INSTRUCCIONES ADICIONALES:
       const data = await response.json();
 
       if (data.message) {
-        // Save assistant message to DB
         const { data: savedAssistantMsg } = await supabase
           .from('tutor_messages')
           .insert({
@@ -292,7 +324,6 @@ INSTRUCCIONES ADICIONALES:
           .select()
           .single();
 
-        // Update UI with real messages
         if (savedUserMsg && savedAssistantMsg) {
           setMessages(prev => [
             ...prev.filter(m => !m.id.startsWith('temp-')),
@@ -301,7 +332,6 @@ INSTRUCCIONES ADICIONALES:
           ]);
         }
 
-        // Update conversation title if it's the first message
         if (messages.length === 0) {
           await supabase
             .from('tutor_conversations')
@@ -311,14 +341,12 @@ INSTRUCCIONES ADICIONALES:
             })
             .eq('id', conversationId);
 
-          // Update local state
           setConversations(prev => prev.map(c => 
             c.id === conversationId 
               ? { ...c, title: userMessage.slice(0, 50) + (userMessage.length > 50 ? '...' : '') }
               : c
           ));
         } else {
-          // Just update timestamp
           await supabase
             .from('tutor_conversations')
             .update({ updated_at: new Date().toISOString() })
@@ -327,14 +355,12 @@ INSTRUCCIONES ADICIONALES:
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Remove temp message on error
       setMessages(prev => prev.filter(m => !m.id.startsWith('temp-')));
     }
 
     setIsSending(false);
   };
 
-  // Handle enter key
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -342,7 +368,6 @@ INSTRUCCIONES ADICIONALES:
     }
   };
 
-  // Delete conversation
   const deleteConversation = async (convId: string) => {
     await supabase.from('tutor_conversations').delete().eq('id', convId);
     setConversations(prev => prev.filter(c => c.id !== convId));
@@ -362,9 +387,8 @@ INSTRUCCIONES ADICIONALES:
 
   return (
     <div className="h-full flex bg-white dark:bg-gray-950">
-      {/* Sidebar - Lista de conversaciones */}
+      {/* Sidebar */}
       <div className="w-72 border-r border-gray-200 dark:border-gray-800 flex flex-col">
-        {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Tutor IA</h2>
@@ -385,7 +409,6 @@ INSTRUCCIONES ADICIONALES:
           )}
         </div>
 
-        {/* Lista de conversaciones */}
         <div className="flex-1 overflow-y-auto">
           {conversations.length > 0 ? (
             <div className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -431,9 +454,8 @@ INSTRUCCIONES ADICIONALES:
         </div>
       </div>
 
-      {/* Área principal de chat */}
+      {/* Main chat area */}
       <div className="flex-1 flex flex-col">
-        {/* Header del chat */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1472FF] to-[#5BA0FF] flex items-center justify-center">
@@ -444,16 +466,16 @@ INSTRUCCIONES ADICIONALES:
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white">Tutor IA</h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {userContext ? `Ayudándote con: ${userContext.projectIdea.slice(0, 40)}${userContext.projectIdea.length > 40 ? '...' : ''}` : 'Tu asistente personalizado'}
+                {userContext?.currentVideo 
+                  ? `Clase actual: ${userContext.currentVideo.title}`
+                  : 'Tu asistente de aprendizaje'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Mensajes */}
         <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
           <div className="max-w-3xl mx-auto space-y-4">
-            {/* Mensaje de bienvenida si no hay mensajes */}
             {messages.length === 0 && (
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1472FF] to-[#5BA0FF] flex items-center justify-center flex-shrink-0">
@@ -463,22 +485,12 @@ INSTRUCCIONES ADICIONALES:
                 </div>
                 <div className="flex-1 bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700">
                   <p className="text-gray-900 dark:text-white">
-                    ¡Hola{userContext?.userName ? `, ${userContext.userName.split(' ')[0]}` : ''}! 👋
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300 mt-2">
-                    Soy tu tutor IA personalizado. Conozco tu proyecto 
-                    {userContext?.projectIdea && userContext.projectIdea !== 'No definido' && (
-                      <span className="font-medium text-[#1472FF]"> "{userContext.projectIdea.slice(0, 50)}{userContext.projectIdea.length > 50 ? '...' : ''}"</span>
-                    )} y tu progreso en el curso.
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300 mt-2">
-                    ¿En qué puedo ayudarte hoy?
+                    Hola{userContext?.userName ? ` ${userContext.userName.split(' ')[0]}` : ''}, ¿en qué te puedo ayudar?
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Mensajes de la conversación */}
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -509,7 +521,6 @@ INSTRUCCIONES ADICIONALES:
               </div>
             ))}
 
-            {/* Indicador de escribiendo */}
             {isSending && (
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1472FF] to-[#5BA0FF] flex items-center justify-center flex-shrink-0">
@@ -531,7 +542,6 @@ INSTRUCCIONES ADICIONALES:
           </div>
         </div>
 
-        {/* Input de mensaje */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
           <div className="max-w-3xl mx-auto flex items-end gap-2">
             <textarea
